@@ -25,6 +25,7 @@ class QSellLeadManager {
         this.updateStats();
         this.addSampleData();
         this.updateLeadsCount();
+        this.initCalculator();
     }
 
     setupEventListeners() {
@@ -93,6 +94,12 @@ class QSellLeadManager {
                 }
             });
         });
+
+        // Calculator event listeners
+        document.getElementById('itemsCount').addEventListener('input', () => this.updateCalculator());
+        document.getElementById('adsPlatform').addEventListener('change', () => this.updateCalculator());
+        document.getElementById('deploymentPlatform').addEventListener('change', () => this.updateCalculator());
+        document.getElementById('deploymentProducts').addEventListener('input', () => this.updateCalculator());
     }
 
     addSampleData() {
@@ -609,7 +616,7 @@ class QSellLeadManager {
         `;
         
         // Add styles
-        const bgColor = type === 'success' ? '#00cc00' : type === 'error' ? '#cc0000' : '#cc0000';
+        const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#fd7e14';
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -636,6 +643,134 @@ class QSellLeadManager {
                 document.body.removeChild(notification);
             }, 300);
         }, 3000);
+    }
+
+    // Calculator Methods
+    initCalculator() {
+        this.updateCalculator();
+    }
+
+    updateCalculator() {
+        const itemsCount = parseInt(document.getElementById('itemsCount').value) || 0;
+        const adsPlatform = document.getElementById('adsPlatform').value;
+        const deploymentPlatform = document.getElementById('deploymentPlatform').value;
+        const deploymentProducts = parseInt(document.getElementById('deploymentProducts').value) || 0;
+
+        // Calculate items price (base: 1500 items = 5000 zł)
+        const itemsPrice = Math.max(0, Math.ceil(itemsCount / 1500) * 5000);
+        document.getElementById('itemsPrice').textContent = itemsPrice.toLocaleString('pl-PL') + ' zł';
+        document.getElementById('itemsPrice').parentElement.querySelector('.description').textContent = 
+            `Cena za ${itemsCount.toLocaleString('pl-PL')} przedmiotów`;
+
+        // Calculate ADS price
+        let adsPrice = 0;
+        let adsDescription = '';
+        if (adsPlatform === 'ebay') {
+            adsPrice = 1390;
+            adsDescription = 'Miesięczna opłata za eBay ADS';
+        } else if (adsPlatform === 'kaufland') {
+            adsPrice = 1390;
+            adsDescription = 'Miesięczna opłata za Kaufland ADS';
+        } else if (adsPlatform === 'both') {
+            adsPrice = 2780;
+            adsDescription = 'Miesięczna opłata za eBay + Kaufland ADS';
+        }
+        document.getElementById('adsPrice').textContent = adsPrice.toLocaleString('pl-PL') + ' zł';
+        document.getElementById('adsPrice').parentElement.querySelector('.description').textContent = adsDescription;
+
+        // Calculate deployment price
+        let deploymentPrice = 0;
+        let deploymentDescription = '';
+        if (deploymentPlatform === 'amazon') {
+            if (deploymentProducts <= 1000) {
+                deploymentPrice = 3000;
+            } else if (deploymentProducts <= 3000) {
+                deploymentPrice = 6000;
+            } else if (deploymentProducts <= 5000) {
+                deploymentPrice = 10000;
+            } else {
+                deploymentPrice = 10000 + Math.ceil((deploymentProducts - 5000) / 1000) * 1000;
+            }
+            deploymentDescription = `Wdrożenie na Amazon (${deploymentProducts.toLocaleString('pl-PL')} produktów)`;
+        } else if (deploymentPlatform === 'kaufland') {
+            if (deploymentProducts <= 500) {
+                deploymentPrice = 2500;
+            } else if (deploymentProducts <= 1000) {
+                deploymentPrice = 3500;
+            } else {
+                deploymentPrice = 4500;
+            }
+            deploymentDescription = `Wdrożenie na Kaufland (${deploymentProducts.toLocaleString('pl-PL')} produktów)`;
+        }
+        document.getElementById('deploymentPrice').textContent = deploymentPrice.toLocaleString('pl-PL') + ' zł';
+        document.getElementById('deploymentPrice').parentElement.querySelector('.description').textContent = deploymentDescription;
+
+        // Calculate total
+        let total = itemsPrice + adsPrice + deploymentPrice;
+        let discount = 0;
+        let discountInfo = document.getElementById('discountInfo');
+
+        // Apply discount for multiple services
+        const servicesCount = [itemsPrice, adsPrice, deploymentPrice].filter(price => price > 0).length;
+        if (servicesCount >= 2) {
+            discount = 500;
+            total -= discount;
+            discountInfo.style.display = 'block';
+        } else {
+            discountInfo.style.display = 'none';
+        }
+
+        document.getElementById('totalPrice').textContent = total.toLocaleString('pl-PL') + ' zł';
+    }
+
+    addToLeads() {
+        const itemsCount = parseInt(document.getElementById('itemsCount').value) || 0;
+        const adsPlatform = document.getElementById('adsPlatform').value;
+        const deploymentPlatform = document.getElementById('deploymentPlatform').value;
+        const deploymentProducts = parseInt(document.getElementById('deploymentProducts').value) || 0;
+        const totalPrice = parseInt(document.getElementById('totalPrice').textContent.replace(/[^\d]/g, '')) || 0;
+
+        if (totalPrice === 0) {
+            this.showNotification('Wybierz przynajmniej jedną usługę!', 'error');
+            return;
+        }
+
+        // Create lead description
+        let description = 'Wycena z kalkulatora:\n';
+        if (itemsCount > 0) {
+            description += `- Przerzucenie ${itemsCount.toLocaleString('pl-PL')} przedmiotów\n`;
+        }
+        if (adsPlatform && adsPlatform !== '') {
+            description += `- Prowadzenie ADS: ${adsPlatform}\n`;
+        }
+        if (deploymentProducts > 0) {
+            description += `- Wdrożenie na ${deploymentPlatform}: ${deploymentProducts.toLocaleString('pl-PL')} produktów\n`;
+        }
+        description += `\nCałkowita wartość: ${totalPrice.toLocaleString('pl-PL')} zł`;
+
+        // Create new lead
+        const leadData = {
+            id: Date.now(),
+            name: 'Lead z Kalkulatora',
+            company: 'QSell Calculator',
+            phone: '+48 000 000 000',
+            email: 'calculator@qsell.pl',
+            marketplace: deploymentPlatform === 'amazon' ? 'Amazon' : deploymentPlatform === 'kaufland' ? 'Kaufland' : 'Other',
+            category: 'sales',
+            priority: 'medium',
+            estimatedValue: totalPrice,
+            notes: description,
+            nextAction: 'Skontaktować się z klientem w sprawie wyceny',
+            status: 'new',
+            createdAt: new Date().toISOString()
+        };
+
+        this.leads.unshift(leadData);
+        this.saveToStorage();
+        this.renderLeads();
+        this.updateStats();
+        this.updateLeadsCount();
+        this.showNotification('Lead został dodany z kalkulatora!', 'success');
     }
 }
 
@@ -692,6 +827,59 @@ function copyTemplate(button) {
     const templateText = button.previousElementSibling.textContent;
     navigator.clipboard.writeText(templateText).then(() => {
         qsellLeadManager.showNotification('Szablon skopiowany!', 'success');
+    });
+}
+
+// Calculator functions
+function addToLeads() {
+    qsellLeadManager.addToLeads();
+}
+
+function createQuickLead(title, value) {
+    const leadData = {
+        id: Date.now(),
+        name: `Lead - ${title}`,
+        company: 'QSell Quick Lead',
+        phone: '+48 000 000 000',
+        email: 'quicklead@qsell.pl',
+        marketplace: title.includes('Amazon') ? 'Amazon' : 'Other',
+        category: 'sales',
+        priority: 'medium',
+        estimatedValue: value,
+        notes: `Szybki lead utworzony dla: ${title}\nWartość: ${value.toLocaleString('pl-PL')} zł`,
+        nextAction: 'Skontaktować się z klientem',
+        status: 'new',
+        createdAt: new Date().toISOString()
+    };
+
+    qsellLeadManager.leads.unshift(leadData);
+    qsellLeadManager.saveToStorage();
+    qsellLeadManager.renderLeads();
+    qsellLeadManager.updateStats();
+    qsellLeadManager.updateLeadsCount();
+    qsellLeadManager.showNotification(`Lead "${title}" został dodany!`, 'success');
+}
+
+function calculateAmazonPrice() {
+    // Set calculator to Amazon deployment
+    document.getElementById('deploymentPlatform').value = 'amazon';
+    document.getElementById('deploymentProducts').value = '5000';
+    qsellLeadManager.updateCalculator();
+    
+    // Scroll to calculator
+    document.querySelector('.price-calculator').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+function calculateAdsPrice() {
+    // Set calculator to ADS
+    document.getElementById('adsPlatform').value = 'both';
+    qsellLeadManager.updateCalculator();
+    
+    // Scroll to calculator
+    document.querySelector('.price-calculator').scrollIntoView({ 
+        behavior: 'smooth' 
     });
 }
 

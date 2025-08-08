@@ -88,6 +88,135 @@
             </div>
         </section>
 
+        <!-- Price Calculator -->
+        <section class="price-calculator">
+            <div class="container">
+                <div class="calculator-header">
+                    <h2><i class="fas fa-calculator"></i> Kalkulator Wyceny QSell</h2>
+                    <p>Oblicz koszty usług i otrzymaj rabat za pakiety</p>
+                </div>
+                
+                <div class="calculator-grid">
+                    <div class="calculator-section">
+                        <h3><i class="fas fa-boxes"></i> Przerzucenie Przedmiotów</h3>
+                        <div class="calculator-input">
+                            <label for="itemsCount">Ilość przedmiotów</label>
+                            <input type="number" id="itemsCount" min="0" value="1500" placeholder="np. 1500">
+                        </div>
+                        <div class="calculator-result">
+                            <div class="price" id="itemsPrice">5,000 zł</div>
+                            <div class="description">Bazowa cena za 1,500 przedmiotów</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-section">
+                        <h3><i class="fas fa-ad"></i> Prowadzenie ADS</h3>
+                        <div class="calculator-input">
+                            <label for="adsPlatform">Platforma</label>
+                            <select id="adsPlatform">
+                                <option value="ebay">eBay</option>
+                                <option value="kaufland">Kaufland</option>
+                                <option value="both">eBay + Kaufland</option>
+                            </select>
+                        </div>
+                        <div class="calculator-result">
+                            <div class="price" id="adsPrice">1,390 zł</div>
+                            <div class="description">Miesięczna opłata za prowadzenie kampanii</div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-section">
+                        <h3><i class="fas fa-rocket"></i> Wdrożenia</h3>
+                        <div class="calculator-input">
+                            <label for="deploymentPlatform">Platforma</label>
+                            <select id="deploymentPlatform">
+                                <option value="amazon">Amazon</option>
+                                <option value="kaufland">Kaufland</option>
+                            </select>
+                        </div>
+                        <div class="calculator-input">
+                            <label for="deploymentProducts">Ilość produktów</label>
+                            <input type="number" id="deploymentProducts" min="0" value="5000" placeholder="np. 5000">
+                        </div>
+                        <div class="calculator-result">
+                            <div class="price" id="deploymentPrice">10,000 zł</div>
+                            <div class="description">Wdrożenie na Amazon (5,000 produktów)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="total-section">
+                    <h3>Całkowita Wycena</h3>
+                    <div class="total-price" id="totalPrice">16,390 zł</div>
+                    <div class="discount-info" id="discountInfo" style="display: none;">
+                        <i class="fas fa-gift"></i>
+                        <span>Rabat za pakiet: -500 zł</span>
+                    </div>
+                    <button class="btn btn-orange" onclick="addToLeads()">
+                        <i class="fas fa-plus"></i> Dodaj jako Lead
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Leads Section -->
+        <section class="quick-leads">
+            <div class="container">
+                <h2><i class="fas fa-bolt"></i> Szybkie Leady</h2>
+                <div class="quick-leads-grid">
+                    <div class="quick-lead-card">
+                        <div class="quick-lead-header">
+                            <div class="quick-lead-icon amazon">
+                                <i class="fab fa-amazon"></i>
+                            </div>
+                            <div class="quick-lead-info">
+                                <h3>Amazon Integration</h3>
+                                <p>Kompleksowa integracja z Amazon</p>
+                            </div>
+                        </div>
+                        <div class="quick-lead-price">od 3,000 zł</div>
+                        <div class="quick-lead-description">
+                            Pełna integracja z Amazon Seller Central, automatyczne synchronizowanie produktów, 
+                            zarządzanie cenami i stanami magazynowymi.
+                        </div>
+                        <div class="quick-lead-actions">
+                            <button class="btn-add-lead" onclick="createQuickLead('Amazon Integration', 3000)">
+                                <i class="fas fa-plus"></i> Dodaj Lead
+                            </button>
+                            <button class="btn-calculate" onclick="calculateAmazonPrice()">
+                                <i class="fas fa-calculator"></i> Oblicz
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-lead-card">
+                        <div class="quick-lead-header">
+                            <div class="quick-lead-icon ads">
+                                <i class="fas fa-ad"></i>
+                            </div>
+                            <div class="quick-lead-info">
+                                <h3>ADS Management</h3>
+                                <p>Profesjonalne prowadzenie kampanii</p>
+                            </div>
+                        </div>
+                        <div class="quick-lead-price">1,390 zł/mies.</div>
+                        <div class="quick-lead-description">
+                            Kompleksowe zarządzanie kampaniami reklamowymi na eBay i Kaufland, 
+                            optymalizacja kosztów, monitoring wyników i raportowanie.
+                        </div>
+                        <div class="quick-lead-actions">
+                            <button class="btn-add-lead" onclick="createQuickLead('ADS Management', 1390)">
+                                <i class="fas fa-plus"></i> Dodaj Lead
+                            </button>
+                            <button class="btn-calculate" onclick="calculateAdsPrice()">
+                                <i class="fas fa-calculator"></i> Oblicz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Advanced Filters -->
         <section class="advanced-filters">
             <div class="container">
