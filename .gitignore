@@ -1,0 +1,70 @@
+# QSell Lead Manager - .gitignore
+
+# Logi aplikacji
+logs/
+*.log
+
+# Pliki PDF wycen
+quotes/
+*.pdf
+
+# Pliki tymczasowe
+tmp/
+temp/
+*.tmp
+
+# Pliki konfiguracyjne środowiska
+.env
+.env.local
+.env.production
+
+# Zależności Composer
+vendor/
+composer.lock
+
+# Pliki IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db
+
+# Pliki backup
+*.bak
+*.backup
+*.old
+
+# Pliki cache
+cache/
+*.cache
+
+# Pliki sesji
+sessions/
+
+# Pliki upload
+uploads/
+
+# Pliki testów
+tests/coverage/
+.phpunit.result.cache
+
+# Pliki npm (jeśli używasz)
+node_modules/
+package-lock.json
+
+# Pliki bazy danych
+*.sql
+*.db
+
+# Pliki SSL
+*.pem
+*.key
+*.crt
+
+# Pliki konfiguracyjne serwera
+nginx.conf
+apache.conf
