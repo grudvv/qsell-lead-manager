@@ -283,6 +283,128 @@
         </div>
     </div>
 
+    <!-- Modal dodawania leada -->
+    <div id="addLeadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-plus"></i> Dodaj nowego leada</h3>
+                <button class="modal-close" onclick="closeAddLeadModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addLeadForm" onsubmit="addNewLead(event)">
+                <div class="form-group">
+                    <label for="leadName">Imię i nazwisko *</label>
+                    <input type="text" id="leadName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="leadEmail">Email *</label>
+                    <input type="email" id="leadEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="leadPhone">Telefon</label>
+                    <input type="tel" id="leadPhone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label for="leadCompany">Firma</label>
+                    <input type="text" id="leadCompany" name="company">
+                </div>
+                <div class="form-group">
+                    <label for="leadSource">Źródło</label>
+                    <select id="leadSource" name="source">
+                        <option value="manual">Ręczne dodanie</option>
+                        <option value="meta_ads">Meta Ads</option>
+                        <option value="website">Strona WWW</option>
+                        <option value="referral">Polecenie</option>
+                        <option value="other">Inne</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="leadCampaign">Kampania</label>
+                    <input type="text" id="leadCampaign" name="campaign">
+                </div>
+                <div class="form-group">
+                    <label for="leadNotes">Notatki</label>
+                    <textarea id="leadNotes" name="notes" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddLeadModal()">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Dodaj leada</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal dodawania wyceny -->
+    <div id="addQuoteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-calculator"></i> Dodaj nową wycenę</h3>
+                <button class="modal-close" onclick="closeAddQuoteModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addQuoteForm" onsubmit="addNewQuote(event)">
+                <div class="form-group">
+                    <label for="quoteLead">Lead *</label>
+                    <select id="quoteLead" name="lead_id" required>
+                        <option value="">Wybierz leada</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quoteTitle">Tytuł wyceny *</label>
+                    <input type="text" id="quoteTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="quoteDescription">Opis</label>
+                    <textarea id="quoteDescription" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="quoteDiscount">Rabat procentowy (%)</label>
+                    <input type="number" id="quoteDiscount" name="discount_percent" min="0" max="50" value="0">
+                </div>
+                <div class="form-group">
+                    <label>Usługi w wycenie</label>
+                    <div id="quoteServices">
+                        <div class="service-item">
+                            <select name="services[0][service_type]" required>
+                                <option value="">Wybierz usługę</option>
+                                <option value="implementation">Wdrożenie</option>
+                                <option value="ads_monthly">Obsługa ADS</option>
+                                <option value="complex_monthly">Kompleks</option>
+                            </select>
+                            <select name="services[0][platform]" required>
+                                <option value="">Platforma</option>
+                                <option value="amazon">Amazon</option>
+                                <option value="ebay">eBay</option>
+                                <option value="emag">eMag</option>
+                                <option value="kaufland">Kaufland</option>
+                                <option value="empik">Empik</option>
+                                <option value="erli">ERLI</option>
+                                <option value="allegro_cz_sk_hu">Allegro CZ/SK/HU</option>
+                                <option value="base_com">Base.com</option>
+                            </select>
+                            <select name="services[0][package_type]" required>
+                                <option value="">Pakiet</option>
+                                <option value="basic">Podstawowy</option>
+                                <option value="standard">Standard</option>
+                                <option value="premium">Premium</option>
+                            </select>
+                            <input type="number" name="services[0][quantity]" placeholder="Ilość" min="1" value="1" required>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addServiceItem()">
+                        <i class="fas fa-plus"></i> Dodaj usługę
+                    </button>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddQuoteModal()">Anuluj</button>
+                    <button type="submit" class="btn btn-primary">Utwórz wycenę</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

@@ -25,6 +25,7 @@ function checkLoginStatus() {
     if (savedUser) {
         currentUser = JSON.parse(savedUser);
         isLoggedIn = true;
+        loadData(); // Wczytanie zapisanych danych
         showMainApp();
         loadSampleData();
     } else {
@@ -364,16 +365,391 @@ function editQuote(quoteId) {
     showNotification('Funkcja edycji wyceny - do implementacji', 'info');
 }
 
+// Generowanie PDF wyceny
 function generatePDF(quoteId) {
-    showNotification('Generowanie PDF - do implementacji', 'info');
+    showNotification('Generowanie PDF - do implementacji w backend', 'info');
+    // W przyszłości tutaj będzie integracja z backend do generowania PDF
 }
 
+// Pokazywanie modala dodawania leada
 function showAddLeadModal() {
-    showNotification('Funkcja dodawania leada - do implementacji', 'info');
+    document.getElementById('addLeadModal').style.display = 'block';
+    // Reset formularza
+    document.getElementById('addLeadForm').reset();
 }
 
+// Zamykanie modala dodawania leada
+function closeAddLeadModal() {
+    document.getElementById('addLeadModal').style.display = 'none';
+}
+
+// Pokazywanie modala dodawania wyceny
 function showAddQuoteModal() {
-    showNotification('Funkcja dodawania wyceny - do implementacji', 'info');
+    document.getElementById('addQuoteModal').style.display = 'block';
+    // Reset formularza
+    document.getElementById('addQuoteForm').reset();
+    
+    // Wypełnienie selecta z leadami
+    populateLeadsSelect();
+    
+    // Reset usług
+    resetQuoteServices();
+}
+
+// Zamykanie modala dodawania wyceny
+function closeAddQuoteModal() {
+    document.getElementById('addQuoteModal').style.display = 'none';
+}
+
+// Dodawanie nowego leada
+function addNewLead(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const leadData = {
+        id: Date.now(), // Tymczasowe ID
+        name: formData.get('name'),
+        email: formData.get('email'),
+        phone: formData.get('phone') || '',
+        company: formData.get('company') || '',
+        source: formData.get('source'),
+        campaign: formData.get('campaign') || '',
+        status: 'new',
+        notes: formData.get('notes') || '',
+        created_at: new Date().toISOString()
+    };
+    
+    // Dodanie do listy
+    leads.push(leadData);
+    
+    // Aktualizacja widoku
+    renderLeads();
+    updateStats();
+    
+    // Zamknięcie modala
+    closeAddLeadModal();
+    
+    // Powiadomienie
+    showNotification('Lead dodany pomyślnie!', 'success');
+    
+    // Zapisanie w localStorage
+    saveData();
+}
+
+// Dodawanie nowej wyceny
+function addNewQuote(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const services = getQuoteServices();
+    
+    if (services.length === 0) {
+        showNotification('Dodaj przynajmniej jedną usługę!', 'error');
+        return;
+    }
+    
+    // Obliczanie ceny
+    const pricing = calculateQuotePricing(services, parseFloat(formData.get('discount_percent') || 0));
+    
+    const quoteData = {
+        id: Date.now(), // Tymczasowe ID
+        lead_id: parseInt(formData.get('lead_id')),
+        title: formData.get('title'),
+        description: formData.get('description') || '',
+        total_amount: pricing.total_amount,
+        discount_percent: parseFloat(formData.get('discount_percent') || 0),
+        discount_amount: pricing.discount_amount,
+        final_amount: pricing.final_amount,
+        status: 'draft',
+        created_at: new Date().toISOString(),
+        services: services
+    };
+    
+    // Dodanie do listy
+    quotes.push(quoteData);
+    
+    // Aktualizacja widoku
+    renderQuotes();
+    updateStats();
+    
+    // Zamknięcie modala
+    closeAddQuoteModal();
+    
+    // Powiadomienie
+    showNotification('Wycena utworzona pomyślnie!', 'success');
+    
+    // Zapisanie w localStorage
+    saveData();
+}
+
+// Pobieranie usług z formularza wyceny
+function getQuoteServices() {
+    const services = [];
+    const serviceItems = document.querySelectorAll('#quoteServices .service-item');
+    
+    serviceItems.forEach((item, index) => {
+        const serviceType = item.querySelector('select[name*="[service_type]"]').value;
+        const platform = item.querySelector('select[name*="[platform]"]').value;
+        const packageType = item.querySelector('select[name*="[package_type]"]').value;
+        const quantity = parseInt(item.querySelector('input[name*="[quantity]"]').value);
+        
+        if (serviceType && platform && packageType && quantity > 0) {
+            const price = getServicePrice(serviceType, platform, packageType);
+            services.push({
+                service_type: serviceType,
+                platform: platform,
+                package_type: packageType,
+                quantity: quantity,
+                unit_price: price,
+                total_price: price * quantity,
+                description: `${getServiceText(serviceType)} - ${getPlatformText(platform)} (${getPackageText(packageType)})`
+            });
+        }
+    });
+    
+    return services;
+}
+
+// Obliczanie ceny wyceny
+function calculateQuotePricing(services, discountPercent) {
+    let totalAmount = 0;
+    
+    services.forEach(service => {
+        totalAmount += service.total_price;
+    });
+    
+    // Rabat za pakiet (jeśli więcej niż 1 usługa)
+    let packageDiscount = 0;
+    if (services.length >= 2) {
+        packageDiscount = 500; // 500 PLN za pakiet
+    }
+    
+    // Rabat procentowy
+    let discountAmount = 0;
+    if (discountPercent > 0) {
+        discountAmount = (totalAmount - packageDiscount) * (discountPercent / 100);
+    }
+    
+    // Łączny rabat
+    const totalDiscount = packageDiscount + discountAmount;
+    
+    // Cena końcowa
+    const finalAmount = totalAmount - totalDiscount;
+    
+    return {
+        total_amount: totalAmount,
+        package_discount: packageDiscount,
+        discount_percent: discountPercent,
+        discount_amount: discountAmount,
+        total_discount: totalDiscount,
+        final_amount: finalAmount
+    };
+}
+
+// Pobieranie ceny usługi
+function getServicePrice(serviceType, platform, packageType) {
+    const prices = {
+        'amazon': {
+            'implementation': { 'basic': 3000, 'standard': 5000, 'premium': 10000 },
+            'ads_monthly': 1890,
+            'complex_monthly': 1890
+        },
+        'ebay': {
+            'implementation': { 'basic': 2500, 'standard': 3500, 'premium': 5000 },
+            'ads_monthly': 1390,
+            'complex_monthly': 1390
+        },
+        'emag': {
+            'implementation': { 'basic': 3000, 'standard': 5000, 'premium': 10000 },
+            'ads_monthly': 790,
+            'complex_monthly': 1500
+        },
+        'kaufland': {
+            'implementation': { 'basic': 2500, 'standard': 3500, 'premium': 4500 },
+            'ads_monthly': 1390,
+            'complex_monthly': 1390
+        },
+        'empik': {
+            'implementation': { 'basic': 3000, 'standard': 5000, 'premium': 10000 },
+            'ads_monthly': 790,
+            'complex_monthly': 1190
+        },
+        'erli': {
+            'implementation': { 'basic': 3000, 'standard': 5000, 'premium': 10000 },
+            'ads_monthly': 790,
+            'complex_monthly': 1190
+        },
+        'allegro_cz_sk_hu': {
+            'ads_monthly': 300
+        },
+        'base_com': {
+            'implementation': { 'basic': 3000, 'standard': 5000, 'premium': 10000 }
+        }
+    };
+    
+    if (serviceType === 'implementation') {
+        return prices[platform]?.[serviceType]?.[packageType] || 0;
+    } else {
+        return prices[platform]?.[serviceType] || 0;
+    }
+}
+
+// Teksty usług
+function getServiceText(serviceType) {
+    const texts = {
+        'implementation': 'Wdrożenie',
+        'ads_monthly': 'Obsługa ADS',
+        'complex_monthly': 'Kompleks'
+    };
+    return texts[serviceType] || serviceType;
+}
+
+// Teksty platform
+function getPlatformText(platform) {
+    const texts = {
+        'amazon': 'Amazon',
+        'ebay': 'eBay',
+        'emag': 'eMag',
+        'kaufland': 'Kaufland',
+        'empik': 'Empik',
+        'erli': 'ERLI',
+        'allegro_cz_sk_hu': 'Allegro CZ/SK/HU',
+        'base_com': 'Base.com'
+    };
+    return texts[platform] || platform;
+}
+
+// Teksty pakietów
+function getPackageText(packageType) {
+    const texts = {
+        'basic': 'Podstawowy',
+        'standard': 'Standard',
+        'premium': 'Premium'
+    };
+    return texts[packageType] || packageType;
+}
+
+// Wypełnienie selecta z leadami
+function populateLeadsSelect() {
+    const select = document.getElementById('quoteLead');
+    select.innerHTML = '<option value="">Wybierz leada</option>';
+    
+    leads.forEach(lead => {
+        const option = document.createElement('option');
+        option.value = lead.id;
+        option.textContent = `${lead.name} (${lead.company || lead.email})`;
+        select.appendChild(option);
+    });
+}
+
+// Reset usług w wycenie
+function resetQuoteServices() {
+    const servicesContainer = document.getElementById('quoteServices');
+    servicesContainer.innerHTML = `
+        <div class="service-item">
+            <select name="services[0][service_type]" required>
+                <option value="">Wybierz usługę</option>
+                <option value="implementation">Wdrożenie</option>
+                <option value="ads_monthly">Obsługa ADS</option>
+                <option value="complex_monthly">Kompleks</option>
+            </select>
+            <select name="services[0][platform]" required>
+                <option value="">Platforma</option>
+                <option value="amazon">Amazon</option>
+                <option value="ebay">eBay</option>
+                <option value="emag">eMag</option>
+                <option value="kaufland">Kaufland</option>
+                <option value="empik">Empik</option>
+                <option value="erli">ERLI</option>
+                <option value="allegro_cz_sk_hu">Allegro CZ/SK/HU</option>
+                <option value="base_com">Base.com</option>
+            </select>
+            <select name="services[0][package_type]" required>
+                <option value="">Pakiet</option>
+                <option value="basic">Podstawowy</option>
+                <option value="standard">Standard</option>
+                <option value="premium">Premium</option>
+            </select>
+            <input type="number" name="services[0][quantity]" placeholder="Ilość" min="1" value="1" required>
+        </div>
+    `;
+}
+
+// Dodawanie nowej usługi do wyceny
+function addServiceItem() {
+    const servicesContainer = document.getElementById('quoteServices');
+    const serviceCount = servicesContainer.children.length;
+    
+    const newService = document.createElement('div');
+    newService.className = 'service-item';
+    newService.innerHTML = `
+        <select name="services[${serviceCount}][service_type]" required>
+            <option value="">Wybierz usługę</option>
+            <option value="implementation">Wdrożenie</option>
+            <option value="ads_monthly">Obsługa ADS</option>
+            <option value="complex_monthly">Kompleks</option>
+        </select>
+        <select name="services[${serviceCount}][platform]" required>
+            <option value="">Platforma</option>
+            <option value="amazon">Amazon</option>
+            <option value="ebay">eBay</option>
+            <option value="emag">eMag</option>
+            <option value="kaufland">Kaufland</option>
+            <option value="empik">Empik</option>
+            <option value="erli">ERLI</option>
+            <option value="allegro_cz_sk_hu">Allegro CZ/SK/HU</option>
+            <option value="base_com">Base.com</option>
+        </select>
+        <select name="services[${serviceCount}][package_type]" required>
+            <option value="">Pakiet</option>
+            <option value="basic">Podstawowy</option>
+            <option value="standard">Standard</option>
+            <option value="premium">Premium</option>
+        </select>
+        <input type="number" name="services[${serviceCount}][quantity]" placeholder="Ilość" min="1" value="1" required>
+        <button type="button" class="btn btn-secondary" onclick="removeServiceItem(this)" style="padding: 8px; font-size: 12px;">
+            <i class="fas fa-trash"></i>
+        </button>
+    `;
+    
+    servicesContainer.appendChild(newService);
+}
+
+// Usuwanie usługi z wyceny
+function removeServiceItem(button) {
+    button.parentElement.remove();
+}
+
+// Zamykanie modali po kliknięciu poza nimi
+window.onclick = function(event) {
+    const addLeadModal = document.getElementById('addLeadModal');
+    const addQuoteModal = document.getElementById('addQuoteModal');
+    
+    if (event.target === addLeadModal) {
+        closeAddLeadModal();
+    }
+    if (event.target === addQuoteModal) {
+        closeAddQuoteModal();
+    }
+}
+
+// Zapisanie danych w localStorage
+function saveData() {
+    localStorage.setItem('qsell_leads', JSON.stringify(leads));
+    localStorage.setItem('qsell_quotes', JSON.stringify(quotes));
+}
+
+// Wczytywanie danych z localStorage
+function loadData() {
+    const savedLeads = localStorage.getItem('qsell_leads');
+    const savedQuotes = localStorage.getItem('qsell_quotes');
+    
+    if (savedLeads) {
+        leads = JSON.parse(savedLeads);
+    }
+    if (savedQuotes) {
+        quotes = JSON.parse(savedQuotes);
+    }
 }
 
 // System powiadomień
