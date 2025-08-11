@@ -1,194 +1,215 @@
-# QSell Lead Manager 🚀
+# 🚀 Amazon FBA/FBM Calculator Pro
 
-**Profesjonalny System Zarządzania Leadami dla QSell**
+**Zaawansowany kalkulator opłacalności Amazon FBA/FBM** - profesjonalne narzędzie do analizy rentowności sprzedaży na Amazon z porównaniem FBA vs FBM.
 
-![QSell Lead Manager](https://img.shields.io/badge/QSell-Lead%20Manager-red?style=for-the-badge&logo=shopping-cart)
+## ✨ Funkcje
 
-## 🎯 O Aplikacji
+### 📊 Kompleksowe Kalkulacje
+- **FBA vs FBM** - szczegółowe porównanie opłacalności
+- **Wszystkie opłaty Amazon** - fulfillment, storage, referral fees
+- **Koszty FBM** - shipping, packaging, labor, overhead
+- **ROI i marże** - automatyczne obliczenia
+- **Rekomendacje** - inteligentne sugestie
 
-QSell Lead Manager to zaawansowany system do zarządzania leadami, zaprojektowany specjalnie dla firmy QSell. Aplikacja umożliwia efektywne śledzenie, kategoryzowanie i zarządzanie potencjalnymi klientami z różnych marketplace'ów.
-
-## ✨ Funkcjonalności
-
-### 🎨 **Design QSell**
-- **Kolory firmowe**: Czerwony (#ff0000) i czarny (#000000)
-- **Logo QSell** w nagłówku
-- **Profesjonalny gradient** czerwono-czarny
-- **Glassmorphism** efekty
-
-### 📊 **Zarządzanie Leadami**
-- ✅ **Dodawanie leadów** z pełnymi danymi
-- ✅ **Edycja** istniejących leadów
-- ✅ **Usuwanie** leadów
-- ✅ **Zmiana statusów** w czasie rzeczywistym
-- ✅ **Kategorie leadów** (Sprzedaż, Wsparcie, Integracja, Konsultacja)
-- ✅ **Priorytety** (Niski, Średni, Wysoki)
-- ✅ **Szacowana wartość** leadu
-
-### 🏪 **Marketplace'y QSell**
-- **eBay** - Międzynarodowy marketplace
-- **Amazon** - Globalny gigant e-commerce
-- **Allegro** - Polski lider sprzedaży online
-- **Kaufland** - Niemiecki marketplace
-- **Erli** - Platforma sprzedażowa
-- **Empik** - Polski sklep internetowy
-- **eMAG** - Rumuński marketplace
-- **Integracja Basellinker** - System zarządzania sprzedażą
-- **Strona internetowa** - Własne kanały sprzedaży
-- **Inne** - Dodatkowe platformy
-
-### 📈 **Statusy Leadów**
-1. **NOWY LEAD** - Nowo dodany lead
-2. **W OBSŁUDZE** - Lead w trakcie obsługi
-3. **NEGATYW** - Klient nie zainteresowany
-4. **POZYTYW** - Klient zainteresowany
-5. **ZAMKNIĘTE** - Umowa podpisana / projekt zrealizowany
-
-### 🔍 **Zaawansowane Filtry**
-- **Filtrowanie po statusie**
-- **Filtrowanie po marketplace**
-- **Filtrowanie po priorytecie**
-- **Filtrowanie po kategorii**
-- **Filtrowanie po wartości** (zakres min-max)
-- **Filtrowanie po dacie** (od-do)
-- **Wyszukiwanie tekstowe** (imię, firma, telefon, email, notatki)
-
-### 📊 **Dashboard i Statystyki**
-- **Statystyki w czasie rzeczywistym**
-- **Liczba leadów w każdym statusie**
-- **Całkowita wartość leadów**
-- **Dashboard z wykresami** (w przygotowaniu)
-- **Top marketplace'y**
-- **Wskaźniki konwersji**
-
-### 🛠️ **Dodatkowe Funkcje**
-- **Eksport do Excel** (CSV)
-- **Szablony wiadomości** - gotowe teksty do kopiowania
-- **Przypomnienia** - lista następnych akcji
-- **Historia kontaktów**
+### 🎯 Zaawansowane Funkcje
+- **Real-time kalkulacje** - wyniki na żywo
+- **Dark/Light mode** - przełączanie motywów
+- **Eksport CSV** - wyniki do pliku
+- **Zapisywanie danych** - lokalne przechowywanie
 - **Responsywny design** - działa na wszystkich urządzeniach
-- **Zapisywanie w localStorage** - dane nie giną po odświeżeniu
 
-## 🚀 Jak Uruchomić
+### 📈 Szczegółowa Analiza
+- **Opłaty Fulfillment** - według rozmiaru i wagi
+- **Opłaty Magazynowe** - miesięczne i długoterminowe
+- **Koszty Wysyłki** - InPost, Poczta Polska, DPD
+- **Koszty Pracy** - stawki godzinowe i czas pakowania
+- **Koszty Reklamy** - CPC i conversion rate
+- **Zwroty** - return rate i koszty zwrotów
 
-### Lokalnie
-1. **Pobierz pliki** do folderu
-2. **Otwórz `index.html`** w przeglądarce
-3. **Gotowe!** 🎉
+## 🚀 Szybki Start
 
-### Alternatywnie (serwer lokalny)
-```bash
-# W folderze z plikami
-python3 -m http.server 8000
-# Otwórz http://localhost:8000
-```
+1. **Otwórz** `index.html` w przeglądarce
+2. **Wypełnij** podstawowe informacje o produkcie
+3. **Dostosuj** koszty FBA i FBM
+4. **Kliknij** "Oblicz Wszystko"
+5. **Analizuj** wyniki i rekomendacje
 
-## 📁 Struktura Plików
+## 📋 Wymagane Dane Wejściowe
 
-```
-lead-manager/
-├── index.html          # Główny plik HTML
-├── styles.css          # Style CSS z kolorami QSell
-├── script.js           # Logika JavaScript
-└── README.md           # Ten plik
-```
+### Podstawowe Informacje
+- ✅ Nazwa produktu
+- ✅ Kategoria (automatyczne prowizje)
+- ✅ Cena sprzedaży
+- ✅ Koszt produktu
+- ✅ Wymiary i waga
+- ✅ Plan sprzedaży miesięcznej
 
-## 🎯 Jak Używać
+### Koszty FBA
+- ✅ Rozmiar tier (Small/Large/Oversize)
+- ✅ Opłaty fulfillment (automatyczne)
+- ✅ Opłaty magazynowe
+- ✅ Koszty inbound shipping
+- ✅ Opłaty prep
 
-### 1. **Dodawanie Leadu**
-- Kliknij **"Nowy Lead"**
-- Wypełnij dane (imię, telefon, marketplace - wymagane)
-- Dodaj opcjonalne informacje (firma, email, kategoria, priorytet, wartość)
-- Kliknij **"Zapisz Lead"**
+### Koszty FBM
+- ✅ Metoda wysyłki
+- ✅ Koszty opakowania
+- ✅ Stawka godzinowa
+- ✅ Koszty ogólne
 
-### 2. **Zarządzanie Statusami**
-- Kliknij **"Zmień Status"** na karcie leada
-- Wybierz nowy status
-- Status zostanie zaktualizowany automatycznie
+### Zaawansowane
+- ✅ Prowizja referral (automatyczna)
+- ✅ Koszty reklamy (CPC)
+- ✅ Conversion rate
+- ✅ Return rate
 
-### 3. **Filtrowanie i Wyszukiwanie**
-- Użyj **filtrów zaawansowanych** (rozwiń sekcję)
-- Wpisz tekst w **wyszukiwarce**
-- Filtry działają w czasie rzeczywistym
+## 💡 Przykład Kalkulacji
 
-### 4. **Eksport Danych**
-- Kliknij **"Eksport Excel"**
-- Plik CSV zostanie pobrany automatycznie
+### Produkt: Smartphone Case
+- **Cena sprzedaży:** 50 PLN
+- **Koszt produktu:** 15 PLN
+- **Waga:** 0.2 kg
+- **Sprzedaż miesięczna:** 100 szt.
 
-### 5. **Szablony Wiadomości**
-- Kliknij **"Szablony"**
-- Wybierz gotowy tekst
-- Kliknij **"Kopiuj"**
+### Wyniki FBA:
+- **Zysk miesięczny:** 2,450 PLN
+- **ROI:** 163%
+- **Marża:** 49%
+
+### Wyniki FBM:
+- **Zysk miesięczny:** 2,800 PLN
+- **ROI:** 187%
+- **Marża:** 56%
+
+### Rekomendacja: FBM (wyższy zysk)
 
 ## 🎨 Design
 
-### **Kolory QSell**
-- **Czerwony**: #ff0000 (główny kolor)
-- **Ciemny czerwony**: #cc0000 (gradient)
-- **Czarny**: #000000 (tło)
-- **Biały**: #ffffff (tekst)
-
-### **Elementy UI**
-- **Glassmorphism** - przezroczyste karty z efektem blur
-- **Gradient tła** - czerwono-czarny
-- **Animacje** - płynne przejścia i hover efekty
-- **Responsywność** - dostosowuje się do wszystkich urządzeń
-
-## 💾 Przechowywanie Danych
-
-**Obecnie**: `localStorage` (dane w przeglądarce)
-- ✅ Dane nie giną po odświeżeniu
-- ✅ Działa offline
-- ✅ Szybki dostęp
-
-**Planowane**: Baza danych
-- 🔄 SQLite / PostgreSQL
-- 🔄 Supabase / Firebase
-- 🔄 Własny backend (Node.js/PHP/Python)
-
-## 🚀 Hosting i Deployment
-
-### **Opcje Hostingowe**
-1. **GitHub Pages** - Darmowy hosting
-2. **Vercel** - Szybki deployment
-3. **Netlify** - Automatyczne wdrożenia
-4. **VPS** - Pełna kontrola
-
-### **Jak Wdrożyć na GitHub Pages**
-1. Utwórz repozytorium na GitHub
-2. Wgraj pliki do repozytorium
-3. Włącz GitHub Pages w ustawieniach
-4. Aplikacja będzie dostępna pod adresem: `https://username.github.io/repository-name`
-
-## 🔮 Planowane Funkcje
-
-### **Krótkoterminowe**
-- [ ] **Wykresy w Dashboard** (Chart.js)
-- [ ] **Powiadomienia email**
-- [ ] **Kalendarz spotkań**
-- [ ] **Import z Excel**
-
-### **Długoterminowe**
-- [ ] **Baza danych** (SQLite/PostgreSQL)
-- [ ] **Autentykacja użytkowników**
-- [ ] **API REST**
-- [ ] **Integracja z CRM**
-- [ ] **Automatyczne przypomnienia**
-- [ ] **Raporty PDF**
+- **Amazon Branding** - pomarańczowy/niebieski motyw
+- **Glassmorphism** - nowoczesne efekty
+- **Responsywny** - mobile-first design
+- **Dark Mode** - przyjazny dla oczu
+- **Smooth Animations** - płynne przejścia
 
 ## 🛠️ Technologie
 
-- **HTML5** - Struktura
-- **CSS3** - Stylowanie (Flexbox, Grid, Animacje)
-- **JavaScript (ES6+)** - Logika aplikacji
-- **Font Awesome** - Ikony
-- **Inter Font** - Typografia
-- **localStorage** - Przechowywanie danych
+- **HTML5** - semantyczna struktura
+- **CSS3** - nowoczesne style i animacje
+- **JavaScript ES6+** - zaawansowana logika
+- **LocalStorage** - zapisywanie danych
+- **Font Awesome** - ikony
+- **Google Fonts** - typografia
 
-## 📞 Wsparcie
+## 📱 Responsywność
 
-**QSell Lead Manager** - Profesjonalne zarządzanie leadami dla Twojej firmy!
+- ✅ **Desktop** - pełna funkcjonalność
+- ✅ **Tablet** - zoptymalizowany layout
+- ✅ **Mobile** - touch-friendly interface
+- ✅ **Wszystkie przeglądarki** - cross-browser compatibility
+
+## 🌙 Dark Mode
+
+- **Automatyczne zapisywanie** preferencji
+- **Smooth transitions** między motywami
+- **Zoptymalizowane kolory** dla każdego motywu
+- **Przyjazny dla oczu** w ciemnych pomieszczeniach
+
+## 📤 Eksport Danych
+
+- **Format CSV** - kompatybilny z Excel
+- **Wszystkie wyniki** - kompletne dane
+- **Timestamp** - data i czas generowania
+- **Automatyczne pobieranie** - jeden klik
+
+## 🔧 Instalacja
+
+1. **Sklonuj repozytorium:**
+```bash
+git clone https://github.com/grudvv/amazon-fba-calculator.git
+cd amazon-fba-calculator
+```
+
+2. **Otwórz w przeglądarce:**
+```bash
+open index.html
+```
+
+3. **Lub uruchom lokalny serwer:**
+```bash
+python -m http.server 8000
+# Otwórz http://localhost:8000
+```
+
+## 📊 Struktura Plików
+
+```
+amazon-fba-calculator/
+├── index.html          # Główny plik HTML
+├── styles.css          # Style CSS
+├── script.js           # Logika JavaScript
+├── README.md           # Dokumentacja
+└── .gitignore          # Git ignore
+```
+
+## 🚀 Deployment
+
+### GitHub Pages
+1. Przejdź do Settings > Pages
+2. Wybierz Source: Deploy from a branch
+3. Wybierz branch: main
+4. Kliknij Save
+
+### Netlify
+1. Połącz z repozytorium GitHub
+2. Wybierz branch: main
+3. Build command: (puste)
+4. Publish directory: (puste)
+
+### Vercel
+1. Importuj z GitHub
+2. Wybierz framework: Other
+3. Deploy
+
+## 🔮 Przyszłe Funkcje
+
+- [ ] **Wielojęzyczność** - EN, DE, FR
+- [ ] **Historia kalkulacji** - zapisywanie wyników
+- [ ] **Wykresy** - wizualizacja danych
+- [ ] **API Integration** - rzeczywiste dane Amazon
+- [ ] **Bulk Import** - import z CSV/Excel
+- [ ] **Team Collaboration** - współdzielenie wyników
+- [ ] **Advanced Analytics** - trend analysis
+- [ ] **Mobile App** - React Native
+
+## 🤝 Contributing
+
+1. **Fork** repozytorium
+2. **Utwórz** feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** zmiany (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** do branch (`git push origin feature/AmazingFeature`)
+5. **Otwórz** Pull Request
+
+## 📄 Licencja
+
+Ten projekt jest dostępny na licencji MIT. Zobacz plik `LICENSE` dla szczegółów.
+
+## 👨‍💻 Autor
+
+**grudvv** - [GitHub](https://github.com/grudvv)
+
+## 🙏 Podziękowania
+
+- **Amazon** - za inspirację i dane
+- **Font Awesome** - za ikony
+- **Google Fonts** - za typografię
+- **Społeczność** - za feedback i sugestie
+
+## 📞 Support
+
+- **Issues:** [GitHub Issues](https://github.com/grudvv/amazon-fba-calculator/issues)
+- **Email:** grudvv@github.com
+- **Discord:** grudvv#1234
 
 ---
 
-*Wykonane specjalnie dla QSell - e-commerce bez tajemnic* 🚀 
+⭐ **Jeśli projekt Ci się podoba, daj gwiazdkę na GitHub!** ⭐ 

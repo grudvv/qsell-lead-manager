@@ -1,936 +1,546 @@
-// QSell Lead Manager Application
-class QSellLeadManager {
+// Amazon FBA/FBM Calculator Pro - Advanced Calculation Engine
+
+class AmazonCalculator {
     constructor() {
-        this.leads = JSON.parse(localStorage.getItem('qsell_leads')) || [];
-        this.currentFilter = 'all';
-        this.currentSearch = '';
-        this.editingLeadId = null;
-        this.filters = {
-            status: 'all',
-            marketplace: '',
-            priority: '',
-            category: '',
-            minValue: '',
-            maxValue: '',
-            dateFrom: '',
-            dateTo: ''
-        };
-        
         this.init();
     }
 
     init() {
         this.setupEventListeners();
-        this.renderLeads();
-        this.updateStats();
-        this.addSampleData();
-        this.updateLeadsCount();
-        this.initCalculator();
+        this.setupTabs();
+        this.loadSavedData();
     }
 
     setupEventListeners() {
-        // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.setFilter(e.target.dataset.status);
-            });
-        });
-
-        // Search input
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            this.setSearch(e.target.value);
-        });
-
-        // Lead form
-        document.getElementById('leadForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.saveLead();
-        });
-
-        // Status options
-        document.querySelectorAll('.status-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                this.changeLeadStatus(e.target.closest('.status-option').dataset.status);
-            });
-        });
-
-        // Advanced filters
-        document.getElementById('marketplaceFilter').addEventListener('change', (e) => {
-            this.filters.marketplace = e.target.value;
-            this.applyFilters();
-        });
-
-        document.getElementById('priorityFilter').addEventListener('change', (e) => {
-            this.filters.priority = e.target.value;
-            this.applyFilters();
-        });
-
-        document.getElementById('categoryFilter').addEventListener('change', (e) => {
-            this.filters.category = e.target.value;
-            this.applyFilters();
-        });
-
-        document.getElementById('minValue').addEventListener('input', (e) => {
-            this.filters.minValue = e.target.value;
-        });
-
-        document.getElementById('maxValue').addEventListener('input', (e) => {
-            this.filters.maxValue = e.target.value;
-        });
-
-        document.getElementById('dateFrom').addEventListener('change', (e) => {
-            this.filters.dateFrom = e.target.value;
-        });
-
-        document.getElementById('dateTo').addEventListener('change', (e) => {
-            this.filters.dateTo = e.target.value;
-        });
-
-        // Close modals on outside click
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    this.closeAllModals();
-                }
-            });
-        });
-
-        // Calculator event listeners
-        document.getElementById('itemsCount').addEventListener('input', () => this.updateCalculator());
-        document.getElementById('adsPlatform').addEventListener('change', () => this.updateCalculator());
-        document.getElementById('deploymentPlatform').addEventListener('change', () => this.updateCalculator());
-        document.getElementById('deploymentProducts').addEventListener('input', () => this.updateCalculator());
-    }
-
-    addSampleData() {
-        if (this.leads.length === 0) {
-            const sampleLeads = [
-                {
-                    id: 1,
-                    name: 'Jan Kowalski',
-                    company: 'TechCorp Sp. z o.o.',
-                    phone: '+48 123 456 789',
-                    email: 'jan.kowalski@techcorp.pl',
-                    marketplace: 'Allegro',
-                    category: 'sales',
-                    priority: 'high',
-                    estimatedValue: 5000,
-                    status: 'new',
-                    notes: 'Interesuje się integracją z Basellinker',
-                    nextAction: 'Zadzwonić za 2 dni',
-                    createdAt: new Date().toISOString()
-                },
-                {
-                    id: 2,
-                    name: 'Anna Nowak',
-                    company: 'E-commerce Solutions',
-                    phone: '+48 987 654 321',
-                    email: 'anna.nowak@ecsolutions.pl',
-                    marketplace: 'Amazon',
-                    category: 'integration',
-                    priority: 'medium',
-                    estimatedValue: 8000,
-                    status: 'processing',
-                    notes: 'Wysłałem ofertę, czekam na odpowiedź',
-                    nextAction: 'Wysłać follow-up email',
-                    createdAt: new Date(Date.now() - 86400000).toISOString()
-                },
-                {
-                    id: 3,
-                    name: 'Piotr Wiśniewski',
-                    company: 'Online Store',
-                    phone: '+48 555 123 456',
-                    email: 'piotr.wisniewski@onlinestore.pl',
-                    marketplace: 'eBay',
-                    category: 'support',
-                    priority: 'low',
-                    estimatedValue: 2000,
-                    status: 'positive',
-                    notes: 'Klient bardzo zainteresowany naszymi usługami',
-                    nextAction: 'Umówić spotkanie',
-                    createdAt: new Date(Date.now() - 172800000).toISOString()
-                },
-                {
-                    id: 4,
-                    name: 'Maria Zielińska',
-                    company: 'Digital Commerce',
-                    phone: '+48 777 888 999',
-                    email: 'maria.zielinska@digitalcommerce.pl',
-                    marketplace: 'eMAG',
-                    category: 'consultation',
-                    priority: 'high',
-                    estimatedValue: 12000,
-                    status: 'closed',
-                    notes: 'Podpisana umowa, projekt w realizacji',
-                    nextAction: 'Monitoring projektu',
-                    createdAt: new Date(Date.now() - 259200000).toISOString()
-                }
-            ];
-            
-            this.leads = sampleLeads;
-            this.saveToStorage();
-            this.renderLeads();
+        // Product category change
+        document.getElementById('productCategory').addEventListener('change', () => {
+            this.updateReferralFee();
             this.updateStats();
-        }
-    }
-
-    openModal(leadId = null) {
-        this.editingLeadId = leadId;
-        const modal = document.getElementById('leadModal');
-        const title = document.getElementById('modalTitle');
-        const form = document.getElementById('leadForm');
-
-        if (leadId) {
-            const lead = this.leads.find(l => l.id === leadId);
-            if (lead) {
-                title.textContent = 'Edytuj Lead';
-                this.fillForm(lead);
-            }
-        } else {
-            title.textContent = 'Nowy Lead';
-            form.reset();
-        }
-
-        modal.classList.add('show');
-    }
-
-    closeModal() {
-        const modal = document.getElementById('leadModal');
-        modal.classList.remove('show');
-        this.editingLeadId = null;
-    }
-
-    openStatusModal(leadId) {
-        this.currentLeadId = leadId;
-        const modal = document.getElementById('statusModal');
-        modal.classList.add('show');
-    }
-
-    closeStatusModal() {
-        const modal = document.getElementById('statusModal');
-        modal.classList.remove('show');
-        this.currentLeadId = null;
-    }
-
-    openTemplates() {
-        const modal = document.getElementById('templatesModal');
-        modal.classList.add('show');
-    }
-
-    closeTemplatesModal() {
-        const modal = document.getElementById('templatesModal');
-        modal.classList.remove('show');
-    }
-
-    openDashboard() {
-        const modal = document.getElementById('dashboardModal');
-        modal.classList.add('show');
-    }
-
-    closeDashboardModal() {
-        const modal = document.getElementById('dashboardModal');
-        modal.classList.remove('show');
-    }
-
-    closeAllModals() {
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.classList.remove('show');
         });
-        this.editingLeadId = null;
-        this.currentLeadId = null;
-    }
 
-    fillForm(lead) {
-        document.getElementById('name').value = lead.name;
-        document.getElementById('company').value = lead.company || '';
-        document.getElementById('phone').value = lead.phone;
-        document.getElementById('email').value = lead.email || '';
-        document.getElementById('marketplace').value = lead.marketplace || '';
-        document.getElementById('category').value = lead.category || 'sales';
-        document.getElementById('priority').value = lead.priority || 'medium';
-        document.getElementById('estimatedValue').value = lead.estimatedValue || '';
-        document.getElementById('notes').value = lead.notes || '';
-        document.getElementById('nextAction').value = lead.nextAction || '';
-    }
+        // Real-time calculation triggers
+        const inputs = document.querySelectorAll('input[type="number"], input[type="text"], select');
+        inputs.forEach(input => {
+            input.addEventListener('input', () => this.updateStats());
+            input.addEventListener('change', () => this.updateStats());
+        });
 
-    saveLead() {
-        const formData = new FormData(document.getElementById('leadForm'));
-        const leadData = {
-            name: formData.get('name'),
-            company: formData.get('company'),
-            phone: formData.get('phone'),
-            email: formData.get('email'),
-            marketplace: formData.get('marketplace'),
-            category: formData.get('category'),
-            priority: formData.get('priority'),
-            estimatedValue: parseFloat(formData.get('estimatedValue')) || 0,
-            notes: formData.get('notes'),
-            nextAction: formData.get('nextAction'),
-            status: 'new',
-            createdAt: new Date().toISOString()
-        };
-
-        if (this.editingLeadId) {
-            // Update existing lead
-            const index = this.leads.findIndex(l => l.id === this.editingLeadId);
-            if (index !== -1) {
-                this.leads[index] = { ...this.leads[index], ...leadData };
-            }
-        } else {
-            // Add new lead
-            leadData.id = Date.now();
-            this.leads.unshift(leadData);
-        }
-
-        this.saveToStorage();
-        this.renderLeads();
-        this.updateStats();
-        this.updateLeadsCount();
-        this.closeModal();
-        this.showNotification('Lead został zapisany!', 'success');
-    }
-
-    changeLeadStatus(newStatus) {
-        if (this.currentLeadId) {
-            const lead = this.leads.find(l => l.id === this.currentLeadId);
-            if (lead) {
-                lead.status = newStatus;
-                this.saveToStorage();
-                this.renderLeads();
-                this.updateStats();
-                this.closeStatusModal();
-                this.showNotification('Status został zmieniony!', 'success');
-            }
-        }
-    }
-
-    deleteLead(leadId) {
-        if (confirm('Czy na pewno chcesz usunąć tego leada?')) {
-            this.leads = this.leads.filter(l => l.id !== leadId);
-            this.saveToStorage();
-            this.renderLeads();
+        // FBA size tier change
+        document.getElementById('fbaSizeTier').addEventListener('change', () => {
+            this.updateFBAFees();
             this.updateStats();
-            this.updateLeadsCount();
-            this.showNotification('Lead został usunięty!', 'success');
-        }
-    }
-
-    setFilter(status) {
-        this.currentFilter = status;
-        
-        // Update active filter button
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
         });
-        document.querySelector(`[data-status="${status}"]`).classList.add('active');
-        
-        this.renderLeads();
+
+        // FBM shipping method change
+        document.getElementById('fbmShippingMethod').addEventListener('change', () => {
+            this.updateFBMShipping();
+            this.updateStats();
+        });
     }
 
-    setSearch(query) {
-        this.currentSearch = query.toLowerCase();
-        this.renderLeads();
+    setupTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                btn.classList.add('active');
+                document.getElementById(targetTab).classList.add('active');
+            });
+        });
     }
 
-    toggleFilters() {
-        const content = document.getElementById('filtersContent');
-        const button = document.querySelector('.filters-header button');
-        const icon = button.querySelector('i');
+    updateReferralFee() {
+        const category = document.getElementById('productCategory').value;
+        const referralFeeInput = document.getElementById('referralFee');
         
-        if (content.classList.contains('show')) {
-            content.classList.remove('show');
-            icon.className = 'fas fa-chevron-down';
-            button.innerHTML = '<i class="fas fa-chevron-down"></i> Rozwiń';
+        const referralRates = {
+            'electronics': 8,
+            'clothing': 17,
+            'home': 15,
+            'books': 15,
+            'sports': 15,
+            'toys': 15,
+            'beauty': 15,
+            'automotive': 12,
+            'health': 15,
+            'other': 15
+        };
+
+        if (category && referralRates[category]) {
+            referralFeeInput.value = referralRates[category];
         } else {
-            content.classList.add('show');
-            icon.className = 'fas fa-chevron-up';
-            button.innerHTML = '<i class="fas fa-chevron-up"></i> Zwiń';
+            referralFeeInput.value = 15; // Default rate
         }
     }
 
-    applyFilters() {
-        this.renderLeads();
+    updateFBAFees() {
+        const sizeTier = document.getElementById('fbaSizeTier').value;
+        const weight = parseFloat(document.getElementById('productWeight').value) || 0;
+        const fulfillmentFeeInput = document.getElementById('fbaFulfillmentFee');
+
+        // FBA fulfillment fees based on size and weight
+        let fee = 0;
+        if (sizeTier === 'small') {
+            if (weight <= 0.5) fee = 3.50;
+            else fee = 4.50;
+        } else if (sizeTier === 'large') {
+            if (weight <= 0.5) fee = 4.50;
+            else if (weight <= 1) fee = 5.50;
+            else if (weight <= 2) fee = 6.50;
+            else if (weight <= 5) fee = 8.50;
+            else fee = 10.50;
+        } else if (sizeTier === 'oversize') {
+            if (weight <= 5) fee = 12.50;
+            else if (weight <= 10) fee = 15.50;
+            else fee = 18.50;
+        }
+
+        fulfillmentFeeInput.value = fee.toFixed(2);
     }
 
-    clearFilters() {
-        this.filters = {
-            status: 'all',
-            marketplace: '',
-            priority: '',
-            category: '',
-            minValue: '',
-            maxValue: '',
-            dateFrom: '',
-            dateTo: ''
-        };
+    updateFBMShipping() {
+        const method = document.getElementById('fbmShippingMethod').value;
+        const weight = parseFloat(document.getElementById('productWeight').value) || 0;
+        const shippingCostInput = document.getElementById('fbmShippingCost');
 
-        // Reset form inputs
-        document.getElementById('marketplaceFilter').value = '';
-        document.getElementById('priorityFilter').value = '';
-        document.getElementById('categoryFilter').value = '';
-        document.getElementById('minValue').value = '';
-        document.getElementById('maxValue').value = '';
-        document.getElementById('dateFrom').value = '';
-        document.getElementById('dateTo').value = '';
-
-        this.renderLeads();
-        this.showNotification('Filtry zostały wyczyszczone!', 'success');
-    }
-
-    getFilteredLeads() {
-        let filtered = this.leads;
-
-        // Filter by status
-        if (this.currentFilter !== 'all') {
-            filtered = filtered.filter(lead => lead.status === this.currentFilter);
+        let cost = 0;
+        if (method === 'inpost') {
+            cost = weight <= 1 ? 8 : 12;
+        } else if (method === 'poczta') {
+            cost = weight <= 1 ? 10 : 15;
+        } else if (method === 'dpd') {
+            cost = weight <= 1 ? 12 : 18;
         }
 
-        // Filter by marketplace
-        if (this.filters.marketplace) {
-            filtered = filtered.filter(lead => lead.marketplace === this.filters.marketplace);
-        }
-
-        // Filter by priority
-        if (this.filters.priority) {
-            filtered = filtered.filter(lead => lead.priority === this.filters.priority);
-        }
-
-        // Filter by category
-        if (this.filters.category) {
-            filtered = filtered.filter(lead => lead.category === this.filters.category);
-        }
-
-        // Filter by value range
-        if (this.filters.minValue) {
-            filtered = filtered.filter(lead => lead.estimatedValue >= parseFloat(this.filters.minValue));
-        }
-        if (this.filters.maxValue) {
-            filtered = filtered.filter(lead => lead.estimatedValue <= parseFloat(this.filters.maxValue));
-        }
-
-        // Filter by date range
-        if (this.filters.dateFrom) {
-            filtered = filtered.filter(lead => new Date(lead.createdAt) >= new Date(this.filters.dateFrom));
-        }
-        if (this.filters.dateTo) {
-            filtered = filtered.filter(lead => new Date(lead.createdAt) <= new Date(this.filters.dateTo));
-        }
-
-        // Filter by search
-        if (this.currentSearch) {
-            filtered = filtered.filter(lead => 
-                lead.name.toLowerCase().includes(this.currentSearch) ||
-                lead.company?.toLowerCase().includes(this.currentSearch) ||
-                lead.phone.includes(this.currentSearch) ||
-                lead.email?.toLowerCase().includes(this.currentSearch) ||
-                lead.marketplace.toLowerCase().includes(this.currentSearch) ||
-                lead.notes?.toLowerCase().includes(this.currentSearch)
-            );
-        }
-
-        return filtered;
-    }
-
-    renderLeads() {
-        const leadsList = document.getElementById('leadsList');
-        const filteredLeads = this.getFilteredLeads();
-
-        if (filteredLeads.length === 0) {
-            leadsList.innerHTML = `
-                <div class="no-leads">
-                    <i class="fas fa-inbox" style="font-size: 3rem; color: rgba(255,255,255,0.6); margin-bottom: 1rem;"></i>
-                    <h3>Brak leadów</h3>
-                    <p>Nie znaleziono leadów spełniających kryteria wyszukiwania.</p>
-                </div>
-            `;
-            return;
-        }
-
-        leadsList.innerHTML = filteredLeads.map(lead => this.createLeadCard(lead)).join('');
-    }
-
-    createLeadCard(lead) {
-        const statusLabels = {
-            new: 'Nowy Lead',
-            processing: 'W Obsłudze',
-            negative: 'Negatyw',
-            positive: 'Pozytyw',
-            closed: 'Zamknięte'
-        };
-
-        const statusIcons = {
-            new: 'fas fa-user-plus',
-            processing: 'fas fa-clock',
-            negative: 'fas fa-thumbs-down',
-            positive: 'fas fa-thumbs-up',
-            closed: 'fas fa-check-circle'
-        };
-
-        const priorityLabels = {
-            low: 'Niski',
-            medium: 'Średni',
-            high: 'Wysoki'
-        };
-
-        const categoryLabels = {
-            sales: 'Sprzedaż',
-            support: 'Wsparcie',
-            integration: 'Integracja',
-            consultation: 'Konsultacja'
-        };
-
-        const createdAt = new Date(lead.createdAt).toLocaleDateString('pl-PL');
-
-        return `
-            <div class="lead-card ${lead.status}">
-                <div class="lead-header">
-                    <div>
-                        <div class="lead-name">${lead.name}</div>
-                        ${lead.company ? `<div class="lead-company">${lead.company}</div>` : ''}
-                        <div class="lead-status ${lead.status}">
-                            <i class="${statusIcons[lead.status]}"></i>
-                            ${statusLabels[lead.status]}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="lead-info">
-                    <p><i class="fas fa-phone"></i> ${lead.phone}</p>
-                    ${lead.email ? `<p><i class="fas fa-envelope"></i> ${lead.email}</p>` : ''}
-                    <p><i class="fas fa-store"></i> ${lead.marketplace}</p>
-                    <p><i class="fas fa-tag"></i> ${categoryLabels[lead.category]}</p>
-                    <div class="lead-priority ${lead.priority}">${priorityLabels[lead.priority]}</div>
-                    ${lead.estimatedValue > 0 ? `<p><i class="fas fa-euro-sign"></i> ${lead.estimatedValue.toLocaleString('pl-PL')} zł</p>` : ''}
-                    ${lead.notes ? `<p><i class="fas fa-sticky-note"></i> ${lead.notes}</p>` : ''}
-                    ${lead.nextAction ? `<p><i class="fas fa-tasks"></i> ${lead.nextAction}</p>` : ''}
-                    <p><i class="fas fa-calendar"></i> Utworzono: ${createdAt}</p>
-                </div>
-                
-                <div class="lead-actions">
-                    <button class="btn-change-status" onclick="qsellLeadManager.openStatusModal(${lead.id})">
-                        <i class="fas fa-exchange-alt"></i> Zmień Status
-                    </button>
-                    <button class="btn-edit" onclick="qsellLeadManager.openModal(${lead.id})">
-                        <i class="fas fa-edit"></i> Edytuj
-                    </button>
-                    <button class="btn-delete" onclick="qsellLeadManager.deleteLead(${lead.id})">
-                        <i class="fas fa-trash"></i> Usuń
-                    </button>
-                </div>
-            </div>
-        `;
+        shippingCostInput.value = cost.toFixed(2);
     }
 
     updateStats() {
-        const stats = {
-            new: this.leads.filter(l => l.status === 'new').length,
-            processing: this.leads.filter(l => l.status === 'processing').length,
-            negative: this.leads.filter(l => l.status === 'negative').length,
-            positive: this.leads.filter(l => l.status === 'positive').length,
-            closed: this.leads.filter(l => l.status === 'closed').length
+        const data = this.getFormData();
+        const results = this.calculateAll(data);
+        this.updateQuickStats(results);
+        this.displayResults(results);
+    }
+
+    getFormData() {
+        return {
+            // Basic Info
+            productName: document.getElementById('productName').value,
+            productCategory: document.getElementById('productCategory').value,
+            sellingPrice: parseFloat(document.getElementById('sellingPrice').value) || 0,
+            productCost: parseFloat(document.getElementById('productCost').value) || 0,
+            productWeight: parseFloat(document.getElementById('productWeight').value) || 0,
+            productLength: parseFloat(document.getElementById('productLength').value) || 0,
+            productWidth: parseFloat(document.getElementById('productWidth').value) || 0,
+            productHeight: parseFloat(document.getElementById('productHeight').value) || 0,
+            monthlySales: parseInt(document.getElementById('monthlySales').value) || 0,
+            inventoryMonths: parseInt(document.getElementById('inventoryMonths').value) || 3,
+
+            // FBA Fees
+            fbaSizeTier: document.getElementById('fbaSizeTier').value,
+            fbaFulfillmentFee: parseFloat(document.getElementById('fbaFulfillmentFee').value) || 0,
+            fbaStorageFee: parseFloat(document.getElementById('fbaStorageFee').value) || 0.75,
+            fbaLongTermStorage: parseFloat(document.getElementById('fbaLongTermStorage').value) || 6.90,
+            fbaInboundShipping: parseFloat(document.getElementById('fbaInboundShipping').value) || 0,
+            fbaPrepFee: parseFloat(document.getElementById('fbaPrepFee').value) || 0,
+
+            // FBM Costs
+            fbmShippingMethod: document.getElementById('fbmShippingMethod').value,
+            fbmShippingCost: parseFloat(document.getElementById('fbmShippingCost').value) || 0,
+            fbmPackagingCost: parseFloat(document.getElementById('fbmPackagingCost').value) || 2.00,
+            fbmPackagingTime: parseFloat(document.getElementById('fbmPackagingTime').value) || 5,
+            fbmHourlyRate: parseFloat(document.getElementById('fbmHourlyRate').value) || 25.00,
+            fbmOverheadCost: parseFloat(document.getElementById('fbmOverheadCost').value) || 1.50,
+
+            // Advanced
+            referralFee: parseFloat(document.getElementById('referralFee').value) || 15,
+            variableClosingFee: parseFloat(document.getElementById('variableClosingFee').value) || 0,
+            cpc: parseFloat(document.getElementById('cpc').value) || 1.50,
+            conversionRate: parseFloat(document.getElementById('conversionRate').value) || 10,
+            returnRate: parseFloat(document.getElementById('returnRate').value) || 5,
+            returnCost: parseFloat(document.getElementById('returnCost').value) || 15.00
         };
-
-        const totalValue = this.leads.reduce((sum, lead) => sum + (lead.estimatedValue || 0), 0);
-
-        document.getElementById('newCount').textContent = stats.new;
-        document.getElementById('processingCount').textContent = stats.processing;
-        document.getElementById('positiveCount').textContent = stats.positive;
-        document.getElementById('closedCount').textContent = stats.closed;
-        document.getElementById('totalValue').textContent = totalValue.toLocaleString('pl-PL') + ' zł';
     }
 
-    updateLeadsCount() {
-        const filteredLeads = this.getFilteredLeads();
-        document.getElementById('leadsCount').textContent = `${filteredLeads.length} leadów`;
-    }
-
-    saveToStorage() {
-        localStorage.setItem('qsell_leads', JSON.stringify(this.leads));
-    }
-
-    exportToExcel() {
-        const filteredLeads = this.getFilteredLeads();
+    calculateAll(data) {
+        // Monthly revenue
+        const monthlyRevenue = data.sellingPrice * data.monthlySales;
         
-        if (filteredLeads.length === 0) {
-            this.showNotification('Brak leadów do eksportu!', 'error');
-            return;
+        // Product costs
+        const monthlyProductCost = data.productCost * data.monthlySales;
+        
+        // Referral fees
+        const monthlyReferralFee = (monthlyRevenue * data.referralFee / 100) + (data.variableClosingFee * data.monthlySales);
+
+        // Calculate FBA and FBM specific costs
+        const fbaFees = this.calculateFBAFees(data);
+        const fbmFees = this.calculateFBMFees(data);
+
+        // Advertising costs
+        const monthlyClicks = (data.monthlySales / (data.conversionRate / 100));
+        const monthlyAdvertisingCost = monthlyClicks * data.cpc;
+
+        // Return costs
+        const monthlyReturns = data.monthlySales * (data.returnRate / 100);
+        const monthlyReturnCost = monthlyReturns * data.returnCost;
+
+        // FBA Calculations
+        const fbaTotalCosts = monthlyProductCost + fbaFees.total + monthlyReferralFee + monthlyAdvertisingCost + monthlyReturnCost;
+        const fbaProfit = monthlyRevenue - fbaTotalCosts;
+        const fbaROI = ((fbaProfit / fbaTotalCosts) * 100) || 0;
+        const fbaMargin = ((fbaProfit / monthlyRevenue) * 100) || 0;
+
+        // FBM Calculations
+        const fbmTotalCosts = monthlyProductCost + fbmFees.total + monthlyReferralFee + monthlyAdvertisingCost + monthlyReturnCost;
+        const fbmProfit = monthlyRevenue - fbmTotalCosts;
+        const fbmROI = ((fbmProfit / fbmTotalCosts) * 100) || 0;
+        const fbmMargin = ((fbmProfit / monthlyRevenue) * 100) || 0;
+
+        // Determine recommendation
+        let recommendation = 'FBA';
+        if (fbmProfit > fbaProfit) {
+            recommendation = 'FBM';
+        } else if (Math.abs(fbaProfit - fbmProfit) < 100) {
+            recommendation = 'Mixed';
         }
 
-        // Create CSV content
-        const headers = ['Imię', 'Firma', 'Telefon', 'Email', 'Marketplace', 'Kategoria', 'Priorytet', 'Wartość', 'Status', 'Notatki', 'Następna Akcja', 'Data Utworzenia'];
-        const csvContent = [
-            headers.join(','),
-            ...filteredLeads.map(lead => [
-                lead.name,
-                lead.company || '',
-                lead.phone,
-                lead.email || '',
-                lead.marketplace,
-                lead.category,
-                lead.priority,
-                lead.estimatedValue || 0,
-                lead.status,
-                (lead.notes || '').replace(/,/g, ';'),
-                (lead.nextAction || '').replace(/,/g, ';'),
-                new Date(lead.createdAt).toLocaleDateString('pl-PL')
-            ].join(','))
-        ].join('\n');
-
-        // Create and download file
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `qsell_leads_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        this.showNotification('Eksport zakończony!', 'success');
+        return {
+            monthlyRevenue,
+            monthlyProductCost,
+            monthlyReferralFee,
+            monthlyAdvertisingCost,
+            monthlyReturnCost,
+            fba: {
+                profit: fbaProfit,
+                roi: fbaROI,
+                margin: fbaMargin,
+                costs: fbaFees,
+                totalCosts: fbaTotalCosts
+            },
+            fbm: {
+                profit: fbmProfit,
+                roi: fbmROI,
+                margin: fbmMargin,
+                costs: fbmFees,
+                totalCosts: fbmTotalCosts
+            },
+            recommendation,
+            profitDifference: fbaProfit - fbmProfit
+        };
     }
 
-    openReminders() {
-        const reminders = this.leads.filter(lead => lead.nextAction && lead.status !== 'closed');
+    calculateFBAFees(data) {
+        // Fulfillment fees
+        const fulfillmentFees = data.fbaFulfillmentFee * data.monthlySales;
+
+        // Storage fees (monthly)
+        const productVolume = (data.productLength * data.productWidth * data.productHeight) / 1000000; // m³
+        const monthlyStorageFee = productVolume * data.fbaStorageFee * data.inventoryMonths;
         
-        if (reminders.length === 0) {
-            this.showNotification('Brak przypomnień!', 'info');
-            return;
+        // Long-term storage (if inventory > 12 months)
+        const longTermStorageFee = data.inventoryMonths > 12 ? 
+            productVolume * data.fbaLongTermStorage * (data.inventoryMonths - 12) : 0;
+
+        // Inbound shipping
+        const inboundShippingCost = data.fbaInboundShipping * data.monthlySales;
+
+        // Prep fees
+        const prepFees = data.fbaPrepFee * data.monthlySales;
+
+        return {
+            fulfillment: fulfillmentFees,
+            storage: monthlyStorageFee + longTermStorageFee,
+            inbound: inboundShippingCost,
+            prep: prepFees,
+            total: fulfillmentFees + monthlyStorageFee + longTermStorageFee + inboundShippingCost + prepFees
+        };
+    }
+
+    calculateFBMFees(data) {
+        // Shipping costs
+        const shippingCosts = data.fbmShippingCost * data.monthlySales;
+
+        // Packaging costs
+        const packagingCosts = data.fbmPackagingCost * data.monthlySales;
+
+        // Labor costs
+        const packagingHours = (data.fbmPackagingTime / 60) * data.monthlySales;
+        const laborCosts = packagingHours * data.fbmHourlyRate;
+
+        // Overhead costs
+        const overheadCosts = data.fbmOverheadCost * data.monthlySales;
+
+        return {
+            shipping: shippingCosts,
+            packaging: packagingCosts,
+            labor: laborCosts,
+            overhead: overheadCosts,
+            total: shippingCosts + packagingCosts + laborCosts + overheadCosts
+        };
+    }
+
+    displayResults(results) {
+        // Update FBA results
+        document.getElementById('fbaProfitDisplay').textContent = `${results.fba.profit.toFixed(2)} zł`;
+        document.getElementById('fbaRevenue').textContent = `${results.monthlyRevenue.toFixed(2)} zł`;
+        document.getElementById('fbaProductCost').textContent = `${results.monthlyProductCost.toFixed(2)} zł`;
+        document.getElementById('fbaFulfillmentFees').textContent = `${results.fba.costs.fulfillment.toFixed(2)} zł`;
+        document.getElementById('fbaStorageFees').textContent = `${results.fba.costs.storage.toFixed(2)} zł`;
+        document.getElementById('fbaReferralFee').textContent = `${results.monthlyReferralFee.toFixed(2)} zł`;
+        document.getElementById('fbaInboundCost').textContent = `${results.fba.costs.inbound.toFixed(2)} zł`;
+        document.getElementById('fbaAdvertisingCost').textContent = `${results.monthlyAdvertisingCost.toFixed(2)} zł`;
+        document.getElementById('fbaNetProfit').innerHTML = `<strong>${results.fba.profit.toFixed(2)} zł</strong>`;
+
+        // Update FBM results
+        document.getElementById('fbmProfitDisplay').textContent = `${results.fbm.profit.toFixed(2)} zł`;
+        document.getElementById('fbmRevenue').textContent = `${results.monthlyRevenue.toFixed(2)} zł`;
+        document.getElementById('fbmProductCost').textContent = `${results.monthlyProductCost.toFixed(2)} zł`;
+        document.getElementById('fbmShippingCosts').textContent = `${results.fbm.costs.shipping.toFixed(2)} zł`;
+        document.getElementById('fbmPackagingCosts').textContent = `${results.fbm.costs.packaging.toFixed(2)} zł`;
+        document.getElementById('fbmLaborCosts').textContent = `${results.fbm.costs.labor.toFixed(2)} zł`;
+        document.getElementById('fbmReferralFee').textContent = `${results.monthlyReferralFee.toFixed(2)} zł`;
+        document.getElementById('fbmAdvertisingCost').textContent = `${results.monthlyAdvertisingCost.toFixed(2)} zł`;
+        document.getElementById('fbmNetProfit').innerHTML = `<strong>${results.fbm.profit.toFixed(2)} zł</strong>`;
+
+        // Update comparison
+        document.getElementById('profitDifference').textContent = `${results.profitDifference.toFixed(2)} zł`;
+        document.getElementById('fbaROI').textContent = `${results.fba.roi.toFixed(1)}%`;
+        document.getElementById('fbmROI').textContent = `${results.fbm.roi.toFixed(1)}%`;
+        document.getElementById('fbaMargin').textContent = `${results.fba.margin.toFixed(1)}%`;
+        document.getElementById('fbmMargin').textContent = `${results.fbm.margin.toFixed(1)}%`;
+
+        // Generate insights
+        this.generateInsights(results);
+
+        // Show results section
+        document.getElementById('resultsSection').style.display = 'block';
+    }
+
+    updateQuickStats(results) {
+        document.getElementById('fbaProfit').textContent = `${results.fba.profit.toFixed(2)} zł`;
+        document.getElementById('fbmProfit').textContent = `${results.fbm.profit.toFixed(2)} zł`;
+        document.getElementById('roiValue').textContent = `${Math.max(results.fba.roi, results.fbm.roi).toFixed(1)}%`;
+        document.getElementById('marginValue').textContent = `${Math.max(results.fba.margin, results.fbm.margin).toFixed(1)}%`;
+        document.getElementById('recommendation').textContent = results.recommendation;
+    }
+
+    generateInsights(results) {
+        const insightsGrid = document.getElementById('insightsGrid');
+        insightsGrid.innerHTML = '';
+
+        // Price optimization insights
+        const priceInsights = this.getPriceOptimizationInsights(results);
+        if (priceInsights) {
+            this.addInsightCard(insightsGrid, '💰 Optymalizacja Cen', priceInsights, 'success');
         }
 
-        let message = 'Przypomnienia:\n\n';
-        reminders.forEach(lead => {
-            message += `• ${lead.name} (${lead.company || 'Brak firmy'}): ${lead.nextAction}\n`;
-        });
-
-        alert(message);
-    }
-
-    showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
-            <span>${message}</span>
-        `;
-        
-        // Add styles
-        const bgColor = type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#fd7e14';
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: ${bgColor};
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-            animation: slideInRight 0.3s ease;
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.style.animation = 'slideOutRight 0.3s ease';
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
-    }
-
-    // Calculator Methods
-    initCalculator() {
-        this.updateCalculator();
-    }
-
-    updateCalculator() {
-        const itemsCount = parseInt(document.getElementById('itemsCount').value) || 0;
-        const adsPlatform = document.getElementById('adsPlatform').value;
-        const deploymentPlatform = document.getElementById('deploymentPlatform').value;
-        const deploymentProducts = parseInt(document.getElementById('deploymentProducts').value) || 0;
-
-        // Calculate items price (base: 1500 items = 5000 zł)
-        const itemsPrice = Math.max(0, Math.ceil(itemsCount / 1500) * 5000);
-        document.getElementById('itemsPrice').textContent = itemsPrice.toLocaleString('pl-PL') + ' zł';
-        document.getElementById('itemsPrice').parentElement.querySelector('.description').textContent = 
-            `Cena za ${itemsCount.toLocaleString('pl-PL')} przedmiotów`;
-
-        // Calculate ADS price
-        let adsPrice = 0;
-        let adsDescription = '';
-        if (adsPlatform === 'ebay') {
-            adsPrice = 1390;
-            adsDescription = 'Miesięczna opłata za eBay ADS';
-        } else if (adsPlatform === 'kaufland') {
-            adsPrice = 1390;
-            adsDescription = 'Miesięczna opłata za Kaufland ADS';
-        } else if (adsPlatform === 'both') {
-            adsPrice = 2780;
-            adsDescription = 'Miesięczna opłata za eBay + Kaufland ADS';
+        // FBA strategy insights
+        const fbaInsights = this.getFBAStrategyInsights(results);
+        if (fbaInsights) {
+            this.addInsightCard(insightsGrid, '📦 Strategia FBA', fbaInsights, 'info');
         }
-        document.getElementById('adsPrice').textContent = adsPrice.toLocaleString('pl-PL') + ' zł';
-        document.getElementById('adsPrice').parentElement.querySelector('.description').textContent = adsDescription;
 
-        // Calculate deployment price
-        let deploymentPrice = 0;
-        let deploymentDescription = '';
-        if (deploymentPlatform === 'amazon') {
-            if (deploymentProducts <= 1000) {
-                deploymentPrice = 3000;
-            } else if (deploymentProducts <= 3000) {
-                deploymentPrice = 6000;
-            } else if (deploymentProducts <= 5000) {
-                deploymentPrice = 10000;
-            } else {
-                deploymentPrice = 10000 + Math.ceil((deploymentProducts - 5000) / 1000) * 1000;
-            }
-            deploymentDescription = `Wdrożenie na Amazon (${deploymentProducts.toLocaleString('pl-PL')} produktów)`;
-        } else if (deploymentPlatform === 'kaufland') {
-            if (deploymentProducts <= 500) {
-                deploymentPrice = 2500;
-            } else if (deploymentProducts <= 1000) {
-                deploymentPrice = 3500;
-            } else {
-                deploymentPrice = 4500;
-            }
-            deploymentDescription = `Wdrożenie na Kaufland (${deploymentProducts.toLocaleString('pl-PL')} produktów)`;
+        // FBM strategy insights
+        const fbmInsights = this.getFBMStrategyInsights(results);
+        if (fbmInsights) {
+            this.addInsightCard(insightsGrid, '🚚 Strategia FBM', fbmInsights, 'warning');
         }
-        document.getElementById('deploymentPrice').textContent = deploymentPrice.toLocaleString('pl-PL') + ' zł';
-        document.getElementById('deploymentPrice').parentElement.querySelector('.description').textContent = deploymentDescription;
 
-        // Calculate total
-        let total = itemsPrice + adsPrice + deploymentPrice;
-        let discount = 0;
-        let discountInfo = document.getElementById('discountInfo');
+        // General recommendations
+        const generalInsights = this.getGeneralInsights(results);
+        if (generalInsights) {
+            this.addInsightCard(insightsGrid, '💡 Ogólne Rekomendacje', generalInsights, 'primary');
+        }
+    }
 
-        // Apply discount for multiple services
-        const servicesCount = [itemsPrice, adsPrice, deploymentPrice].filter(price => price > 0).length;
-        if (servicesCount >= 2) {
-            discount = 500;
-            total -= discount;
-            discountInfo.style.display = 'block';
+    getPriceOptimizationInsights(results) {
+        const insights = [];
+        
+        if (results.fba.margin < 20) {
+            insights.push('Marża FBA jest niska (< 20%). Rozważ podniesienie ceny lub obniżenie kosztów.');
+        }
+        
+        if (results.fbm.margin < 15) {
+            insights.push('Marża FBM jest bardzo niska (< 15%). Sprawdź koszty wysyłki i opakowania.');
+        }
+
+        if (results.monthlyRevenue > 0 && results.monthlyAdvertisingCost / results.monthlyRevenue > 0.15) {
+            insights.push('Koszty reklamy są wysokie (> 15% przychodów). Zoptymalizuj kampanie PPC.');
+        }
+
+        return insights.length > 0 ? insights.join(' ') : null;
+    }
+
+    getFBAStrategyInsights(results) {
+        const insights = [];
+        
+        if (results.fba.costs.storage > results.fba.profit * 0.1) {
+            insights.push('Opłaty magazynowe FBA są wysokie. Rozważ szybszą rotację zapasów.');
+        }
+
+        if (results.fba.costs.inbound > 0 && results.fba.costs.inbound > results.fba.profit * 0.2) {
+            insights.push('Koszty inbound shipping są znaczące. Negocjuj lepsze stawki z przewoźnikami.');
+        }
+
+        if (results.fba.profit > results.fbm.profit && results.profitDifference > 500) {
+            insights.push('FBA jest znacznie bardziej opłacalne. Skup się na optymalizacji procesów FBA.');
+        }
+
+        return insights.length > 0 ? insights.join(' ') : null;
+    }
+
+    getFBMStrategyInsights(results) {
+        const insights = [];
+        
+        if (results.fbm.costs.labor > results.fbm.profit * 0.3) {
+            insights.push('Koszty pracy FBM są wysokie. Automatyzuj procesy pakowania.');
+        }
+
+        if (results.fbm.costs.shipping > results.fbm.profit * 0.25) {
+            insights.push('Koszty wysyłki FBM są znaczące. Rozważ negocjacje z przewoźnikami.');
+        }
+
+        if (results.fbm.profit > results.fba.profit && results.profitDifference < -300) {
+            insights.push('FBM jest bardziej opłacalne. Rozważ przejście na FBM dla tego produktu.');
+        }
+
+        return insights.length > 0 ? insights.join(' ') : null;
+    }
+
+    getGeneralInsights(results) {
+        const insights = [];
+        
+        if (results.recommendation === 'FBA') {
+            insights.push('Rekomendacja: FBA - lepsza opłacalność i mniej pracy operacyjnej.');
+        } else if (results.recommendation === 'FBM') {
+            insights.push('Rekomendacja: FBM - wyższy zysk i kontrola nad procesami.');
         } else {
-            discountInfo.style.display = 'none';
+            insights.push('Rekomendacja: Mixed - rozważ hybrydowe podejście FBA/FBM.');
         }
 
-        document.getElementById('totalPrice').textContent = total.toLocaleString('pl-PL') + ' zł';
+        if (results.fba.roi > 50) {
+            insights.push('ROI FBA jest bardzo dobry (> 50%). Produkt ma duży potencjał.');
+        }
+
+        if (results.fbm.roi > 40) {
+            insights.push('ROI FBM jest dobry (> 40%). Warto rozważyć FBM dla większej kontroli.');
+        }
+
+        return insights.join(' ');
     }
 
-    addToLeads() {
-        const itemsCount = parseInt(document.getElementById('itemsCount').value) || 0;
-        const adsPlatform = document.getElementById('adsPlatform').value;
-        const deploymentPlatform = document.getElementById('deploymentPlatform').value;
-        const deploymentProducts = parseInt(document.getElementById('deploymentProducts').value) || 0;
-        const totalPrice = parseInt(document.getElementById('totalPrice').textContent.replace(/[^\d]/g, '')) || 0;
+    addInsightCard(container, title, content, type) {
+        const card = document.createElement('div');
+        card.className = 'insight-card';
+        card.innerHTML = `
+            <h4>${title}</h4>
+            <p>${content}</p>
+        `;
+        container.appendChild(card);
+    }
 
-        if (totalPrice === 0) {
-            this.showNotification('Wybierz przynajmniej jedną usługę!', 'error');
-            return;
+    loadSavedData() {
+        const savedData = localStorage.getItem('amazonCalculatorData');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            Object.keys(data).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = data[key];
+                }
+            });
+            this.updateStats();
         }
+    }
 
-        // Create lead description
-        let description = 'Wycena z kalkulatora:\n';
-        if (itemsCount > 0) {
-            description += `- Przerzucenie ${itemsCount.toLocaleString('pl-PL')} przedmiotów\n`;
-        }
-        if (adsPlatform && adsPlatform !== '') {
-            description += `- Prowadzenie ADS: ${adsPlatform}\n`;
-        }
-        if (deploymentProducts > 0) {
-            description += `- Wdrożenie na ${deploymentPlatform}: ${deploymentProducts.toLocaleString('pl-PL')} produktów\n`;
-        }
-        description += `\nCałkowita wartość: ${totalPrice.toLocaleString('pl-PL')} zł`;
-
-        // Create new lead
-        const leadData = {
-            id: Date.now(),
-            name: 'Lead z Kalkulatora',
-            company: 'QSell Calculator',
-            phone: '+48 000 000 000',
-            email: 'calculator@qsell.pl',
-            marketplace: deploymentPlatform === 'amazon' ? 'Amazon' : deploymentPlatform === 'kaufland' ? 'Kaufland' : 'Other',
-            category: 'sales',
-            priority: 'medium',
-            estimatedValue: totalPrice,
-            notes: description,
-            nextAction: 'Skontaktować się z klientem w sprawie wyceny',
-            status: 'new',
-            createdAt: new Date().toISOString()
-        };
-
-        this.leads.unshift(leadData);
-        this.saveToStorage();
-        this.renderLeads();
-        this.updateStats();
-        this.updateLeadsCount();
-        this.showNotification('Lead został dodany z kalkulatora!', 'success');
+    saveData() {
+        const data = this.getFormData();
+        localStorage.setItem('amazonCalculatorData', JSON.stringify(data));
     }
 }
 
-// Global functions for HTML onclick handlers
-function openModal() {
-    qsellLeadManager.openModal();
+// Global functions
+function calculateAll() {
+    calculator.updateStats();
+    calculator.saveData();
 }
 
-function closeModal() {
-    qsellLeadManager.closeModal();
-}
-
-function closeStatusModal() {
-    qsellLeadManager.closeStatusModal();
-}
-
-function closeTemplatesModal() {
-    qsellLeadManager.closeTemplatesModal();
-}
-
-function closeDashboardModal() {
-    qsellLeadManager.closeDashboardModal();
-}
-
-function toggleFilters() {
-    qsellLeadManager.toggleFilters();
-}
-
-function clearFilters() {
-    qsellLeadManager.clearFilters();
-}
-
-function applyFilters() {
-    qsellLeadManager.applyFilters();
-}
-
-function exportToExcel() {
-    qsellLeadManager.exportToExcel();
-}
-
-function openTemplates() {
-    qsellLeadManager.openTemplates();
-}
-
-function openReminders() {
-    qsellLeadManager.openReminders();
-}
-
-function openDashboard() {
-    qsellLeadManager.openDashboard();
-}
-
-function copyTemplate(button) {
-    const templateText = button.previousElementSibling.textContent;
-    navigator.clipboard.writeText(templateText).then(() => {
-        qsellLeadManager.showNotification('Szablon skopiowany!', 'success');
-    });
-}
-
-// Calculator functions
-function addToLeads() {
-    qsellLeadManager.addToLeads();
-}
-
-function createQuickLead(title, value) {
-    const leadData = {
-        id: Date.now(),
-        name: `Lead - ${title}`,
-        company: 'QSell Quick Lead',
-        phone: '+48 000 000 000',
-        email: 'quicklead@qsell.pl',
-        marketplace: title.includes('Amazon') ? 'Amazon' : 'Other',
-        category: 'sales',
-        priority: 'medium',
-        estimatedValue: value,
-        notes: `Szybki lead utworzony dla: ${title}\nWartość: ${value.toLocaleString('pl-PL')} zł`,
-        nextAction: 'Skontaktować się z klientem',
-        status: 'new',
-        createdAt: new Date().toISOString()
-    };
-
-    qsellLeadManager.leads.unshift(leadData);
-    qsellLeadManager.saveToStorage();
-    qsellLeadManager.renderLeads();
-    qsellLeadManager.updateStats();
-    qsellLeadManager.updateLeadsCount();
-    qsellLeadManager.showNotification(`Lead "${title}" został dodany!`, 'success');
-}
-
-function calculateAmazonPrice() {
-    // Set calculator to Amazon deployment
-    document.getElementById('deploymentPlatform').value = 'amazon';
-    document.getElementById('deploymentProducts').value = '5000';
-    qsellLeadManager.updateCalculator();
+function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDark);
     
-    // Scroll to calculator
-    document.querySelector('.price-calculator').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
+    const btn = document.querySelector('.btn-secondary');
+    if (isDark) {
+        btn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    } else {
+        btn.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+    }
 }
 
-function calculateAdsPrice() {
-    // Set calculator to ADS
-    document.getElementById('adsPlatform').value = 'both';
-    qsellLeadManager.updateCalculator();
+function exportResults() {
+    const data = calculator.getFormData();
+    const results = calculator.calculateAll(data);
     
-    // Scroll to calculator
-    document.querySelector('.price-calculator').scrollIntoView({ 
-        behavior: 'smooth' 
-    });
+    // Create CSV content
+    const csvContent = [
+        ['Amazon FBA/FBM Calculator Results'],
+        [''],
+        ['Product Information'],
+        ['Product Name', data.productName],
+        ['Category', data.productCategory],
+        ['Selling Price', `${data.sellingPrice} PLN`],
+        ['Product Cost', `${data.productCost} PLN`],
+        ['Monthly Sales', data.monthlySales],
+        [''],
+        ['FBA Results'],
+        ['Monthly Revenue', `${results.monthlyRevenue.toFixed(2)} PLN`],
+        ['FBA Profit', `${results.fba.profit.toFixed(2)} PLN`],
+        ['FBA ROI', `${results.fba.roi.toFixed(1)}%`],
+        ['FBA Margin', `${results.fba.margin.toFixed(1)}%`],
+        [''],
+        ['FBM Results'],
+        ['FBM Profit', `${results.fbm.profit.toFixed(2)} PLN`],
+        ['FBM ROI', `${results.fbm.roi.toFixed(1)}%`],
+        ['FBM Margin', `${results.fbm.margin.toFixed(1)}%`],
+        [''],
+        ['Comparison'],
+        ['Profit Difference (FBA - FBM)', `${results.profitDifference.toFixed(2)} PLN`],
+        ['Recommendation', results.recommendation],
+        [''],
+        ['Generated on', new Date().toLocaleString('pl-PL')]
+    ].map(row => row.join(',')).join('\n');
+
+    // Download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `amazon-calculator-results-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
-// Initialize the application
-let qsellLeadManager;
+// Initialize calculator when DOM is loaded
+let calculator;
 document.addEventListener('DOMContentLoaded', () => {
-    qsellLeadManager = new QSellLeadManager();
-});
-
-// Add CSS animations for notifications
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
+    calculator = new AmazonCalculator();
     
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
+    // Load dark mode preference
+    const isDark = localStorage.getItem('darkMode') === 'true';
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        const btn = document.querySelector('.btn-secondary');
+        btn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
     }
-    
-    .no-leads {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 3rem;
-        background: rgba(0, 0, 0, 0.8);
-        border-radius: 16px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .no-leads h3 {
-        color: white;
-        margin-bottom: 0.5rem;
-    }
-    
-    .no-leads p {
-        color: rgba(255, 255, 255, 0.7);
-    }
-`;
-document.head.appendChild(style); 
+}); 
