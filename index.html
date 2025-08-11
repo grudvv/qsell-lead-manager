@@ -3,475 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amazon FBA/FBM Calculator Pro - Zaawansowany Kalkulator Opłacalności</title>
+    <title>QSell Lead Manager - System Zarządzania Leadami</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="container">
-                <div class="logo-section">
-                    <div class="logo">
-                        <div class="logo-icon">
-                            <i class="fab fa-amazon"></i>
-                        </div>
-                        <div class="logo-text">
-                            <h1>Amazon Calculator Pro</h1>
-                            <span>FBA & FBM Profitability Calculator</span>
-                        </div>
-                    </div>
+        <!-- Login Modal -->
+        <div id="loginModal" class="modal login-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-lock"></i> Logowanie QSell Lead Manager</h2>
+                    <span class="close" onclick="closeLoginModal()">&times;</span>
                 </div>
-                <div class="header-actions">
-                    <button class="btn btn-secondary" onclick="toggleTheme()">
-                        <i class="fas fa-moon"></i> Dark Mode
-                    </button>
-                    <button class="btn btn-primary" onclick="exportResults()">
-                        <i class="fas fa-download"></i> Eksportuj Wyniki
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Quick Stats -->
-        <section class="quick-stats">
-            <div class="container">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon fba">
-                            <i class="fas fa-box"></i>
+                <div class="modal-body">
+                    <form id="loginForm" onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="username">Nazwa użytkownika:</label>
+                            <input type="text" id="username" name="username" required>
                         </div>
-                        <div class="stat-content">
-                            <h3 id="fbaProfit">0 zł</h3>
-                            <p>Profit FBA</p>
+                        <div class="form-group">
+                            <label for="password">Hasło:</label>
+                            <input type="password" id="password" name="password" required>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon fbm">
-                            <i class="fas fa-shipping-fast"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="fbmProfit">0 zł</h3>
-                            <p>Profit FBM</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon roi">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="roiValue">0%</h3>
-                            <p>ROI</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon margin">
-                            <i class="fas fa-percentage"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="marginValue">0%</h3>
-                            <p>Marża</p>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon recommendation">
-                            <i class="fas fa-lightbulb"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="recommendation">-</h3>
-                            <p>Rekomendacja</p>
-                        </div>
-                    </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Zaloguj się
+                        </button>
+                    </form>
+                    <div id="loginError" class="error-message" style="display: none;"></div>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Main Calculator -->
-        <section class="main-calculator">
-            <div class="container">
-                <div class="calculator-header">
-                    <h2><i class="fas fa-calculator"></i> Zaawansowany Kalkulator Amazon FBA/FBM</h2>
-                    <p>Oblicz dokładną opłacalność i porównaj FBA vs FBM</p>
-                </div>
-                
-                <!-- Calculator Tabs -->
-                <div class="calculator-tabs">
-                    <button class="tab-btn active" data-tab="basic">
-                        <i class="fas fa-info-circle"></i> Podstawowe Informacje
-                    </button>
-                    <button class="tab-btn" data-tab="fba">
-                        <i class="fas fa-box"></i> Koszty FBA
-                    </button>
-                    <button class="tab-btn" data-tab="fbm">
-                        <i class="fas fa-shipping-fast"></i> Koszty FBM
-                    </button>
-                    <button class="tab-btn" data-tab="advanced">
-                        <i class="fas fa-cogs"></i> Zaawansowane
-                    </button>
-                </div>
-
-                <!-- Tab Content -->
-                <div class="tab-content active" id="basic">
-                    <div class="calculator-grid">
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-box"></i> Informacje o Produkcie</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="productName">Nazwa Produktu</label>
-                                    <input type="text" id="productName" placeholder="Nazwa produktu">
-                                </div>
-                                <div class="form-group">
-                                    <label for="productCategory">Kategoria</label>
-                                    <select id="productCategory">
-                                        <option value="">Wybierz kategorię</option>
-                                        <option value="electronics">Elektronika (8%)</option>
-                                        <option value="clothing">Odzież (17%)</option>
-                                        <option value="home">Dom i Ogród (15%)</option>
-                                        <option value="books">Książki (15%)</option>
-                                        <option value="sports">Sport (15%)</option>
-                                        <option value="toys">Zabawki (15%)</option>
-                                        <option value="beauty">Kosmetyki (15%)</option>
-                                        <option value="automotive">Motoryzacja (12%)</option>
-                                        <option value="health">Zdrowie (15%)</option>
-                                        <option value="other">Inne (15%)</option>
-                                    </select>
-                                </div>
+        <!-- Main Application (hidden until login) -->
+        <div id="mainApp" style="display: none;">
+            <!-- Header -->
+            <header class="header">
+                <div class="container">
+                    <div class="logo-section">
+                        <div class="logo">
+                            <div class="logo-icon">
+                                <i class="fas fa-chart-line"></i>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="sellingPrice">Cena Sprzedaży (PLN)</label>
-                                    <input type="number" id="sellingPrice" placeholder="0.00" step="0.01">
-                                </div>
-                                <div class="form-group">
-                                    <label for="productCost">Koszt Produktu (PLN)</label>
-                                    <input type="number" id="productCost" placeholder="0.00" step="0.01">
-                                </div>
+                            <div class="logo-text">
+                                <h1>QSell Lead Manager</h1>
+                                <span>System Zarządzania Leadami</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="toggleTheme()">
+                            <i class="fas fa-moon"></i> Dark Mode
+                        </button>
+                        <button class="btn btn-primary" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Wyloguj
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-ruler"></i> Wymiary i Waga</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="productWeight">Waga (kg)</label>
-                                    <input type="number" id="productWeight" placeholder="0.00" step="0.01">
-                                </div>
-                                <div class="form-group">
-                                    <label for="productLength">Długość (cm)</label>
-                                    <input type="number" id="productLength" placeholder="0" step="0.1">
-                                </div>
+            <!-- Quick Stats -->
+            <section class="quick-stats">
+                <div class="container">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon leads">
+                                <i class="fas fa-users"></i>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="productWidth">Szerokość (cm)</label>
-                                    <input type="number" id="productWidth" placeholder="0" step="0.1">
-                                </div>
-                                <div class="form-group">
-                                    <label for="productHeight">Wysokość (cm)</label>
-                                    <input type="number" id="productHeight" placeholder="0" step="0.1">
-                                </div>
+                            <div class="stat-content">
+                                <h3 id="totalLeads">0</h3>
+                                <p>Wszystkie Leady</p>
                             </div>
                         </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-chart-bar"></i> Plan Sprzedaży</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="monthlySales">Sprzedaż Miesięczna (szt.)</label>
-                                    <input type="number" id="monthlySales" placeholder="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="inventoryMonths">Miesiące Zapasów</label>
-                                    <input type="number" id="inventoryMonths" placeholder="3" value="3">
-                                </div>
+                        <div class="stat-card">
+                            <div class="stat-icon new">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="newLeads">0</h3>
+                                <p>Nowe Leady</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon quotes">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="totalQuotes">0</h3>
+                                <p>Wszystkie Wyceny</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon meta">
+                                <i class="fab fa-facebook"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3 id="metaLeads">0</h3>
+                                <p>Leady z Meta Ads</p>
                             </div>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="tab-content" id="fba">
-                    <div class="calculator-grid">
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-box"></i> Opłaty Fulfillment</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fbaSizeTier">Rozmiar Tier</label>
-                                    <select id="fbaSizeTier">
-                                        <option value="small">Small Standard (do 0.5kg)</option>
-                                        <option value="large">Large Standard (0.5-9kg)</option>
-                                        <option value="oversize">Oversize (9kg+)</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="fbaFulfillmentFee">Opłata Fulfillment (PLN)</label>
-                                    <input type="number" id="fbaFulfillmentFee" placeholder="0.00" step="0.01">
-                                </div>
-                            </div>
+            <!-- Main Content -->
+            <section class="main-content">
+                <div class="container">
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="showTab('leads')">
+                            <i class="fas fa-users"></i> Leady
+                        </button>
+                        <button class="tab-btn" onclick="showTab('quotes')">
+                            <i class="fas fa-file-invoice-dollar"></i> Wyceny
+                        </button>
+                        <button class="tab-btn" onclick="showTab('calculator')">
+                            <i class="fas fa-calculator"></i> Kalkulator Wyceny
+                        </button>
+                        <button class="tab-btn" onclick="showTab('meta')">
+                            <i class="fab fa-facebook"></i> Meta Ads
+                        </button>
+                    </div>
+
+                    <!-- Leads Tab -->
+                    <div id="leadsTab" class="tab-content active">
+                        <div class="tab-header">
+                            <h2><i class="fas fa-users"></i> Zarządzanie Leadami</h2>
+                            <button class="btn btn-primary" onclick="showAddLeadModal()">
+                                <i class="fas fa-plus"></i> Dodaj Lead
+                            </button>
                         </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-warehouse"></i> Opłaty Magazynowe</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fbaStorageFee">Opłata Magazynowa (PLN/m³/mies.)</label>
-                                    <input type="number" id="fbaStorageFee" placeholder="0.00" step="0.01" value="0.75">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fbaLongTermStorage">Long-term Storage (PLN/m³)</label>
-                                    <input type="number" id="fbaLongTermStorage" placeholder="0.00" step="0.01" value="6.90">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-truck"></i> Inbound Shipping</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fbaInboundShipping">Koszt Wysyłki do Amazon (PLN/szt.)</label>
-                                    <input type="number" id="fbaInboundShipping" placeholder="0.00" step="0.01">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fbaPrepFee">Opłata Prep (PLN/szt.)</label>
-                                    <input type="number" id="fbaPrepFee" placeholder="0.00" step="0.01">
-                                </div>
-                            </div>
+                        <div class="leads-list" id="leadsList">
+                            <!-- Leady będą dodawane dynamicznie -->
                         </div>
                     </div>
-                </div>
 
-                <div class="tab-content" id="fbm">
-                    <div class="calculator-grid">
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-shipping-fast"></i> Koszty Wysyłki</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fbmShippingMethod">Metoda Wysyłki</label>
-                                    <select id="fbmShippingMethod">
-                                        <option value="inpost">InPost (8-12 PLN)</option>
-                                        <option value="poczta">Poczta Polska (10-15 PLN)</option>
-                                        <option value="dpd">DPD (12-18 PLN)</option>
-                                        <option value="custom">Własna</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="fbmShippingCost">Koszt Wysyłki (PLN)</label>
-                                    <input type="number" id="fbmShippingCost" placeholder="0.00" step="0.01">
-                                </div>
-                            </div>
+                    <!-- Quotes Tab -->
+                    <div id="quotesTab" class="tab-content">
+                        <div class="tab-header">
+                            <h2><i class="fas fa-file-invoice-dollar"></i> System Wycen</h2>
+                            <button class="btn btn-primary" onclick="showAddQuoteModal()">
+                                <i class="fas fa-plus"></i> Nowa Wycena
+                            </button>
                         </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-box-open"></i> Koszty Opakowania</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fbmPackagingCost">Koszt Opakowania (PLN/szt.)</label>
-                                    <input type="number" id="fbmPackagingCost" placeholder="0.00" step="0.01" value="2.00">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fbmPackagingTime">Czas Pakowania (min/szt.)</label>
-                                    <input type="number" id="fbmPackagingTime" placeholder="0" step="0.5" value="5">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-users"></i> Koszty Pracy</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="fbmHourlyRate">Stawka Godzinowa (PLN/h)</label>
-                                    <input type="number" id="fbmHourlyRate" placeholder="0.00" step="0.01" value="25.00">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fbmOverheadCost">Koszty Ogólne (PLN/szt.)</label>
-                                    <input type="number" id="fbmOverheadCost" placeholder="0.00" step="0.01" value="1.50">
-                                </div>
-                            </div>
+                        <div class="quotes-list" id="quotesList">
+                            <!-- Wyceny będą dodawane dynamicznie -->
                         </div>
                     </div>
-                </div>
 
-                <div class="tab-content" id="advanced">
-                    <div class="calculator-grid">
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-percentage"></i> Opłaty Amazon</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="referralFee">Prowizja Referral (%)</label>
-                                    <input type="number" id="referralFee" placeholder="0" step="0.1" readonly>
-                                </div>
-                                <div class="form-group">
-                                    <label for="variableClosingFee">Variable Closing Fee (PLN)</label>
-                                    <input type="number" id="variableClosingFee" placeholder="0.00" step="0.01" value="0.00">
-                                </div>
-                            </div>
+                    <!-- Calculator Tab -->
+                    <div id="calculatorTab" class="tab-content">
+                        <div class="tab-header">
+                            <h2><i class="fas fa-calculator"></i> Kalkulator Wyceny QSell</h2>
                         </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-ad"></i> Koszty Reklamy</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="cpc">CPC (PLN)</label>
-                                    <input type="number" id="cpc" placeholder="0.00" step="0.01" value="1.50">
+                        <div class="calculator-content">
+                            <div class="pricing-grid">
+                                <div class="pricing-card">
+                                    <h3>Amazon</h3>
+                                    <div class="pricing-item">
+                                        <span>Wdrożenie:</span>
+                                        <span>4000-5000 PLN</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Obsługa ADS:</span>
+                                        <span>1890 PLN/mies.</span>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="conversionRate">Conversion Rate (%)</label>
-                                    <input type="number" id="conversionRate" placeholder="0" step="0.1" value="10">
+                                <div class="pricing-card">
+                                    <h3>eBay</h3>
+                                    <div class="pricing-item">
+                                        <span>Wdrożenie:</span>
+                                        <span>2500-3500 PLN</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Obsługa ADS:</span>
+                                        <span>1390 PLN/mies.</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-card">
+                                    <h3>eMag</h3>
+                                    <div class="pricing-item">
+                                        <span>Wdrożenie:</span>
+                                        <span>3000-10000 PLN</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Obsługa ADS:</span>
+                                        <span>790 PLN/mies.</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Kompleks:</span>
+                                        <span>1500 PLN/mies.</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-card">
+                                    <h3>Kaufland</h3>
+                                    <div class="pricing-item">
+                                        <span>Wdrożenie:</span>
+                                        <span>2500-4500 PLN</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Obsługa ADS:</span>
+                                        <span>1390 PLN/mies.</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-card">
+                                    <h3>Empik</h3>
+                                    <div class="pricing-item">
+                                        <span>Wdrożenie:</span>
+                                        <span>3000-10000 PLN</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Obsługa ADS:</span>
+                                        <span>790 PLN/mies.</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Kompleks:</span>
+                                        <span>1190 PLN/mies.</span>
+                                    </div>
+                                </div>
+                                <div class="pricing-card">
+                                    <h3>ERLI</h3>
+                                    <div class="pricing-item">
+                                        <span>Wdrożenie:</span>
+                                        <span>3000-10000 PLN</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Standard:</span>
+                                        <span>790 PLN/mies.</span>
+                                    </div>
+                                    <div class="pricing-item">
+                                        <span>Kompleks:</span>
+                                        <span>1190 PLN/mies.</span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="calculator-section">
-                            <h3><i class="fas fa-undo"></i> Zwroty</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="returnRate">Return Rate (%)</label>
-                                    <input type="number" id="returnRate" placeholder="0" step="0.1" value="5">
-                                </div>
-                                <div class="form-group">
-                                    <label for="returnCost">Koszt Zwrotu (PLN)</label>
-                                    <input type="number" id="returnCost" placeholder="0.00" step="0.01" value="15.00">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="calculate-section">
-                    <button class="btn btn-primary btn-large" onclick="calculateAll()">
-                        <i class="fas fa-calculator"></i> Oblicz Wszystko
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Results Section -->
-        <section class="results-section" id="resultsSection" style="display: none;">
-            <div class="container">
-                <div class="results-header">
-                    <h2><i class="fas fa-chart-pie"></i> Wyniki Kalkulacji</h2>
-                    <p>Szczegółowa analiza opłacalności FBA vs FBM</p>
-                </div>
-
-                <div class="results-grid">
-                    <div class="result-card fba">
-                        <div class="result-header">
-                            <h3><i class="fas fa-box"></i> Amazon FBA</h3>
-                            <div class="result-profit" id="fbaProfitDisplay">0 zł</div>
-                        </div>
-                        <div class="result-details">
-                            <div class="result-row">
-                                <span>Przychód:</span>
-                                <span id="fbaRevenue">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Koszt Produktu:</span>
-                                <span id="fbaProductCost">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Opłaty Fulfillment:</span>
-                                <span id="fbaFulfillmentFees">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Opłaty Magazynowe:</span>
-                                <span id="fbaStorageFees">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Prowizja Referral:</span>
-                                <span id="fbaReferralFee">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Inbound Shipping:</span>
-                                <span id="fbaInboundCost">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Koszty Reklamy:</span>
-                                <span id="fbaAdvertisingCost">0 zł</span>
-                            </div>
-                            <div class="result-row total">
-                                <span><strong>Zysk Netto:</strong></span>
-                                <span id="fbaNetProfit"><strong>0 zł</strong></span>
+                            <div class="discount-info">
+                                <h3>Rabaty za Pakiety</h3>
+                                <p><strong>500 PLN rabatu</strong> za pakiet z minimum 2 usługami</p>
+                                <p><strong>Rabat procentowy</strong> - ustawiany ręcznie przez admina</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="result-card fbm">
-                        <div class="result-header">
-                            <h3><i class="fas fa-shipping-fast"></i> Amazon FBM</h3>
-                            <div class="result-profit" id="fbmProfitDisplay">0 zł</div>
+                    <!-- Meta Ads Tab -->
+                    <div id="metaTab" class="tab-content">
+                        <div class="tab-header">
+                            <h2><i class="fab fa-facebook"></i> Meta Ads Integration</h2>
                         </div>
-                        <div class="result-details">
-                            <div class="result-row">
-                                <span>Przychód:</span>
-                                <span id="fbmRevenue">0 zł</span>
+                        <div class="meta-content">
+                            <div class="meta-status">
+                                <h3>Status Integracji</h3>
+                                <div class="status-item">
+                                    <span>Webhook URL:</span>
+                                    <code id="webhookUrl">https://twoja-domena.pl/api/meta-webhook.php</code>
+                                </div>
+                                <div class="status-item">
+                                    <span>Token weryfikacji:</span>
+                                    <code>qsell_webhook_2024</code>
+                                </div>
+                                <div class="status-item">
+                                    <span>Status:</span>
+                                    <span class="status-badge active">Aktywny</span>
+                                </div>
                             </div>
-                            <div class="result-row">
-                                <span>Koszt Produktu:</span>
-                                <span id="fbmProductCost">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Koszty Wysyłki:</span>
-                                <span id="fbmShippingCosts">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Koszty Opakowania:</span>
-                                <span id="fbmPackagingCosts">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Koszty Pracy:</span>
-                                <span id="fbmLaborCosts">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Prowizja Referral:</span>
-                                <span id="fbmReferralFee">0 zł</span>
-                            </div>
-                            <div class="result-row">
-                                <span>Koszty Reklamy:</span>
-                                <span id="fbmAdvertisingCost">0 zł</span>
-                            </div>
-                            <div class="result-row total">
-                                <span><strong>Zysk Netto:</strong></span>
-                                <span id="fbmNetProfit"><strong>0 zł</strong></span>
+                            <div class="meta-instructions">
+                                <h3>Instrukcje Konfiguracji</h3>
+                                <ol>
+                                    <li>Idź na <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a></li>
+                                    <li>Utwórz nową aplikację "Business" → "Lead Ads"</li>
+                                    <li>W Meta Ads Manager dodaj webhook URL</li>
+                                    <li>Użyj tokenu weryfikacji: <code>qsell_webhook_2024</code></li>
+                                </ol>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="comparison-section">
-                    <h3><i class="fas fa-balance-scale"></i> Porównanie FBA vs FBM</h3>
-                    <div class="comparison-grid">
-                        <div class="comparison-item">
-                            <span>Różnica Zysku:</span>
-                            <span id="profitDifference">0 zł</span>
-                        </div>
-                        <div class="comparison-item">
-                            <span>ROI FBA:</span>
-                            <span id="fbaROI">0%</span>
-                        </div>
-                        <div class="comparison-item">
-                            <span>ROI FBM:</span>
-                            <span id="fbmROI">0%</span>
-                        </div>
-                        <div class="comparison-item">
-                            <span>Marża FBA:</span>
-                            <span id="fbaMargin">0%</span>
-                        </div>
-                        <div class="comparison-item">
-                            <span>Marża FBM:</span>
-                            <span id="fbmMargin">0%</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="insights-section">
-                    <h3><i class="fas fa-lightbulb"></i> Rekomendacje i Insights</h3>
-                    <div class="insights-grid" id="insightsGrid">
-                        <!-- Insights will be populated by JavaScript -->
-                    </div>
-                </div>
-            </div>
-        </section>
+            </section>
+        </div>
     </div>
 
     <script src="script.js"></script>

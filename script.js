@@ -1,546 +1,590 @@
-// Amazon FBA/FBM Calculator Pro - Advanced Calculation Engine
-
-class AmazonCalculator {
-    constructor() {
-        this.init();
-    }
-
-    init() {
-        this.setupEventListeners();
-        this.setupTabs();
-        this.loadSavedData();
-    }
-
-    setupEventListeners() {
-        // Product category change
-        document.getElementById('productCategory').addEventListener('change', () => {
-            this.updateReferralFee();
-            this.updateStats();
-        });
-
-        // Real-time calculation triggers
-        const inputs = document.querySelectorAll('input[type="number"], input[type="text"], select');
-        inputs.forEach(input => {
-            input.addEventListener('input', () => this.updateStats());
-            input.addEventListener('change', () => this.updateStats());
-        });
-
-        // FBA size tier change
-        document.getElementById('fbaSizeTier').addEventListener('change', () => {
-            this.updateFBAFees();
-            this.updateStats();
-        });
-
-        // FBM shipping method change
-        document.getElementById('fbmShippingMethod').addEventListener('change', () => {
-            this.updateFBMShipping();
-            this.updateStats();
-        });
-    }
-
-    setupTabs() {
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const targetTab = btn.getAttribute('data-tab');
-                
-                // Remove active class from all tabs and contents
-                tabBtns.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(content => content.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding content
-                btn.classList.add('active');
-                document.getElementById(targetTab).classList.add('active');
-            });
-        });
-    }
-
-    updateReferralFee() {
-        const category = document.getElementById('productCategory').value;
-        const referralFeeInput = document.getElementById('referralFee');
-        
-        const referralRates = {
-            'electronics': 8,
-            'clothing': 17,
-            'home': 15,
-            'books': 15,
-            'sports': 15,
-            'toys': 15,
-            'beauty': 15,
-            'automotive': 12,
-            'health': 15,
-            'other': 15
-        };
-
-        if (category && referralRates[category]) {
-            referralFeeInput.value = referralRates[category];
-        } else {
-            referralFeeInput.value = 15; // Default rate
-        }
-    }
-
-    updateFBAFees() {
-        const sizeTier = document.getElementById('fbaSizeTier').value;
-        const weight = parseFloat(document.getElementById('productWeight').value) || 0;
-        const fulfillmentFeeInput = document.getElementById('fbaFulfillmentFee');
-
-        // FBA fulfillment fees based on size and weight
-        let fee = 0;
-        if (sizeTier === 'small') {
-            if (weight <= 0.5) fee = 3.50;
-            else fee = 4.50;
-        } else if (sizeTier === 'large') {
-            if (weight <= 0.5) fee = 4.50;
-            else if (weight <= 1) fee = 5.50;
-            else if (weight <= 2) fee = 6.50;
-            else if (weight <= 5) fee = 8.50;
-            else fee = 10.50;
-        } else if (sizeTier === 'oversize') {
-            if (weight <= 5) fee = 12.50;
-            else if (weight <= 10) fee = 15.50;
-            else fee = 18.50;
-        }
-
-        fulfillmentFeeInput.value = fee.toFixed(2);
-    }
-
-    updateFBMShipping() {
-        const method = document.getElementById('fbmShippingMethod').value;
-        const weight = parseFloat(document.getElementById('productWeight').value) || 0;
-        const shippingCostInput = document.getElementById('fbmShippingCost');
-
-        let cost = 0;
-        if (method === 'inpost') {
-            cost = weight <= 1 ? 8 : 12;
-        } else if (method === 'poczta') {
-            cost = weight <= 1 ? 10 : 15;
-        } else if (method === 'dpd') {
-            cost = weight <= 1 ? 12 : 18;
-        }
-
-        shippingCostInput.value = cost.toFixed(2);
-    }
-
-    updateStats() {
-        const data = this.getFormData();
-        const results = this.calculateAll(data);
-        this.updateQuickStats(results);
-        this.displayResults(results);
-    }
-
-    getFormData() {
-        return {
-            // Basic Info
-            productName: document.getElementById('productName').value,
-            productCategory: document.getElementById('productCategory').value,
-            sellingPrice: parseFloat(document.getElementById('sellingPrice').value) || 0,
-            productCost: parseFloat(document.getElementById('productCost').value) || 0,
-            productWeight: parseFloat(document.getElementById('productWeight').value) || 0,
-            productLength: parseFloat(document.getElementById('productLength').value) || 0,
-            productWidth: parseFloat(document.getElementById('productWidth').value) || 0,
-            productHeight: parseFloat(document.getElementById('productHeight').value) || 0,
-            monthlySales: parseInt(document.getElementById('monthlySales').value) || 0,
-            inventoryMonths: parseInt(document.getElementById('inventoryMonths').value) || 3,
-
-            // FBA Fees
-            fbaSizeTier: document.getElementById('fbaSizeTier').value,
-            fbaFulfillmentFee: parseFloat(document.getElementById('fbaFulfillmentFee').value) || 0,
-            fbaStorageFee: parseFloat(document.getElementById('fbaStorageFee').value) || 0.75,
-            fbaLongTermStorage: parseFloat(document.getElementById('fbaLongTermStorage').value) || 6.90,
-            fbaInboundShipping: parseFloat(document.getElementById('fbaInboundShipping').value) || 0,
-            fbaPrepFee: parseFloat(document.getElementById('fbaPrepFee').value) || 0,
-
-            // FBM Costs
-            fbmShippingMethod: document.getElementById('fbmShippingMethod').value,
-            fbmShippingCost: parseFloat(document.getElementById('fbmShippingCost').value) || 0,
-            fbmPackagingCost: parseFloat(document.getElementById('fbmPackagingCost').value) || 2.00,
-            fbmPackagingTime: parseFloat(document.getElementById('fbmPackagingTime').value) || 5,
-            fbmHourlyRate: parseFloat(document.getElementById('fbmHourlyRate').value) || 25.00,
-            fbmOverheadCost: parseFloat(document.getElementById('fbmOverheadCost').value) || 1.50,
-
-            // Advanced
-            referralFee: parseFloat(document.getElementById('referralFee').value) || 15,
-            variableClosingFee: parseFloat(document.getElementById('variableClosingFee').value) || 0,
-            cpc: parseFloat(document.getElementById('cpc').value) || 1.50,
-            conversionRate: parseFloat(document.getElementById('conversionRate').value) || 10,
-            returnRate: parseFloat(document.getElementById('returnRate').value) || 5,
-            returnCost: parseFloat(document.getElementById('returnCost').value) || 15.00
-        };
-    }
-
-    calculateAll(data) {
-        // Monthly revenue
-        const monthlyRevenue = data.sellingPrice * data.monthlySales;
-        
-        // Product costs
-        const monthlyProductCost = data.productCost * data.monthlySales;
-        
-        // Referral fees
-        const monthlyReferralFee = (monthlyRevenue * data.referralFee / 100) + (data.variableClosingFee * data.monthlySales);
-
-        // Calculate FBA and FBM specific costs
-        const fbaFees = this.calculateFBAFees(data);
-        const fbmFees = this.calculateFBMFees(data);
-
-        // Advertising costs
-        const monthlyClicks = (data.monthlySales / (data.conversionRate / 100));
-        const monthlyAdvertisingCost = monthlyClicks * data.cpc;
-
-        // Return costs
-        const monthlyReturns = data.monthlySales * (data.returnRate / 100);
-        const monthlyReturnCost = monthlyReturns * data.returnCost;
-
-        // FBA Calculations
-        const fbaTotalCosts = monthlyProductCost + fbaFees.total + monthlyReferralFee + monthlyAdvertisingCost + monthlyReturnCost;
-        const fbaProfit = monthlyRevenue - fbaTotalCosts;
-        const fbaROI = ((fbaProfit / fbaTotalCosts) * 100) || 0;
-        const fbaMargin = ((fbaProfit / monthlyRevenue) * 100) || 0;
-
-        // FBM Calculations
-        const fbmTotalCosts = monthlyProductCost + fbmFees.total + monthlyReferralFee + monthlyAdvertisingCost + monthlyReturnCost;
-        const fbmProfit = monthlyRevenue - fbmTotalCosts;
-        const fbmROI = ((fbmProfit / fbmTotalCosts) * 100) || 0;
-        const fbmMargin = ((fbmProfit / monthlyRevenue) * 100) || 0;
-
-        // Determine recommendation
-        let recommendation = 'FBA';
-        if (fbmProfit > fbaProfit) {
-            recommendation = 'FBM';
-        } else if (Math.abs(fbaProfit - fbmProfit) < 100) {
-            recommendation = 'Mixed';
-        }
-
-        return {
-            monthlyRevenue,
-            monthlyProductCost,
-            monthlyReferralFee,
-            monthlyAdvertisingCost,
-            monthlyReturnCost,
-            fba: {
-                profit: fbaProfit,
-                roi: fbaROI,
-                margin: fbaMargin,
-                costs: fbaFees,
-                totalCosts: fbaTotalCosts
-            },
-            fbm: {
-                profit: fbmProfit,
-                roi: fbmROI,
-                margin: fbmMargin,
-                costs: fbmFees,
-                totalCosts: fbmTotalCosts
-            },
-            recommendation,
-            profitDifference: fbaProfit - fbmProfit
-        };
-    }
-
-    calculateFBAFees(data) {
-        // Fulfillment fees
-        const fulfillmentFees = data.fbaFulfillmentFee * data.monthlySales;
-
-        // Storage fees (monthly)
-        const productVolume = (data.productLength * data.productWidth * data.productHeight) / 1000000; // m³
-        const monthlyStorageFee = productVolume * data.fbaStorageFee * data.inventoryMonths;
-        
-        // Long-term storage (if inventory > 12 months)
-        const longTermStorageFee = data.inventoryMonths > 12 ? 
-            productVolume * data.fbaLongTermStorage * (data.inventoryMonths - 12) : 0;
-
-        // Inbound shipping
-        const inboundShippingCost = data.fbaInboundShipping * data.monthlySales;
-
-        // Prep fees
-        const prepFees = data.fbaPrepFee * data.monthlySales;
-
-        return {
-            fulfillment: fulfillmentFees,
-            storage: monthlyStorageFee + longTermStorageFee,
-            inbound: inboundShippingCost,
-            prep: prepFees,
-            total: fulfillmentFees + monthlyStorageFee + longTermStorageFee + inboundShippingCost + prepFees
-        };
-    }
-
-    calculateFBMFees(data) {
-        // Shipping costs
-        const shippingCosts = data.fbmShippingCost * data.monthlySales;
-
-        // Packaging costs
-        const packagingCosts = data.fbmPackagingCost * data.monthlySales;
-
-        // Labor costs
-        const packagingHours = (data.fbmPackagingTime / 60) * data.monthlySales;
-        const laborCosts = packagingHours * data.fbmHourlyRate;
-
-        // Overhead costs
-        const overheadCosts = data.fbmOverheadCost * data.monthlySales;
-
-        return {
-            shipping: shippingCosts,
-            packaging: packagingCosts,
-            labor: laborCosts,
-            overhead: overheadCosts,
-            total: shippingCosts + packagingCosts + laborCosts + overheadCosts
-        };
-    }
-
-    displayResults(results) {
-        // Update FBA results
-        document.getElementById('fbaProfitDisplay').textContent = `${results.fba.profit.toFixed(2)} zł`;
-        document.getElementById('fbaRevenue').textContent = `${results.monthlyRevenue.toFixed(2)} zł`;
-        document.getElementById('fbaProductCost').textContent = `${results.monthlyProductCost.toFixed(2)} zł`;
-        document.getElementById('fbaFulfillmentFees').textContent = `${results.fba.costs.fulfillment.toFixed(2)} zł`;
-        document.getElementById('fbaStorageFees').textContent = `${results.fba.costs.storage.toFixed(2)} zł`;
-        document.getElementById('fbaReferralFee').textContent = `${results.monthlyReferralFee.toFixed(2)} zł`;
-        document.getElementById('fbaInboundCost').textContent = `${results.fba.costs.inbound.toFixed(2)} zł`;
-        document.getElementById('fbaAdvertisingCost').textContent = `${results.monthlyAdvertisingCost.toFixed(2)} zł`;
-        document.getElementById('fbaNetProfit').innerHTML = `<strong>${results.fba.profit.toFixed(2)} zł</strong>`;
-
-        // Update FBM results
-        document.getElementById('fbmProfitDisplay').textContent = `${results.fbm.profit.toFixed(2)} zł`;
-        document.getElementById('fbmRevenue').textContent = `${results.monthlyRevenue.toFixed(2)} zł`;
-        document.getElementById('fbmProductCost').textContent = `${results.monthlyProductCost.toFixed(2)} zł`;
-        document.getElementById('fbmShippingCosts').textContent = `${results.fbm.costs.shipping.toFixed(2)} zł`;
-        document.getElementById('fbmPackagingCosts').textContent = `${results.fbm.costs.packaging.toFixed(2)} zł`;
-        document.getElementById('fbmLaborCosts').textContent = `${results.fbm.costs.labor.toFixed(2)} zł`;
-        document.getElementById('fbmReferralFee').textContent = `${results.monthlyReferralFee.toFixed(2)} zł`;
-        document.getElementById('fbmAdvertisingCost').textContent = `${results.monthlyAdvertisingCost.toFixed(2)} zł`;
-        document.getElementById('fbmNetProfit').innerHTML = `<strong>${results.fbm.profit.toFixed(2)} zł</strong>`;
-
-        // Update comparison
-        document.getElementById('profitDifference').textContent = `${results.profitDifference.toFixed(2)} zł`;
-        document.getElementById('fbaROI').textContent = `${results.fba.roi.toFixed(1)}%`;
-        document.getElementById('fbmROI').textContent = `${results.fbm.roi.toFixed(1)}%`;
-        document.getElementById('fbaMargin').textContent = `${results.fba.margin.toFixed(1)}%`;
-        document.getElementById('fbmMargin').textContent = `${results.fbm.margin.toFixed(1)}%`;
-
-        // Generate insights
-        this.generateInsights(results);
-
-        // Show results section
-        document.getElementById('resultsSection').style.display = 'block';
-    }
-
-    updateQuickStats(results) {
-        document.getElementById('fbaProfit').textContent = `${results.fba.profit.toFixed(2)} zł`;
-        document.getElementById('fbmProfit').textContent = `${results.fbm.profit.toFixed(2)} zł`;
-        document.getElementById('roiValue').textContent = `${Math.max(results.fba.roi, results.fbm.roi).toFixed(1)}%`;
-        document.getElementById('marginValue').textContent = `${Math.max(results.fba.margin, results.fbm.margin).toFixed(1)}%`;
-        document.getElementById('recommendation').textContent = results.recommendation;
-    }
-
-    generateInsights(results) {
-        const insightsGrid = document.getElementById('insightsGrid');
-        insightsGrid.innerHTML = '';
-
-        // Price optimization insights
-        const priceInsights = this.getPriceOptimizationInsights(results);
-        if (priceInsights) {
-            this.addInsightCard(insightsGrid, '💰 Optymalizacja Cen', priceInsights, 'success');
-        }
-
-        // FBA strategy insights
-        const fbaInsights = this.getFBAStrategyInsights(results);
-        if (fbaInsights) {
-            this.addInsightCard(insightsGrid, '📦 Strategia FBA', fbaInsights, 'info');
-        }
-
-        // FBM strategy insights
-        const fbmInsights = this.getFBMStrategyInsights(results);
-        if (fbmInsights) {
-            this.addInsightCard(insightsGrid, '🚚 Strategia FBM', fbmInsights, 'warning');
-        }
-
-        // General recommendations
-        const generalInsights = this.getGeneralInsights(results);
-        if (generalInsights) {
-            this.addInsightCard(insightsGrid, '💡 Ogólne Rekomendacje', generalInsights, 'primary');
-        }
-    }
-
-    getPriceOptimizationInsights(results) {
-        const insights = [];
-        
-        if (results.fba.margin < 20) {
-            insights.push('Marża FBA jest niska (< 20%). Rozważ podniesienie ceny lub obniżenie kosztów.');
-        }
-        
-        if (results.fbm.margin < 15) {
-            insights.push('Marża FBM jest bardzo niska (< 15%). Sprawdź koszty wysyłki i opakowania.');
-        }
-
-        if (results.monthlyRevenue > 0 && results.monthlyAdvertisingCost / results.monthlyRevenue > 0.15) {
-            insights.push('Koszty reklamy są wysokie (> 15% przychodów). Zoptymalizuj kampanie PPC.');
-        }
-
-        return insights.length > 0 ? insights.join(' ') : null;
-    }
-
-    getFBAStrategyInsights(results) {
-        const insights = [];
-        
-        if (results.fba.costs.storage > results.fba.profit * 0.1) {
-            insights.push('Opłaty magazynowe FBA są wysokie. Rozważ szybszą rotację zapasów.');
-        }
-
-        if (results.fba.costs.inbound > 0 && results.fba.costs.inbound > results.fba.profit * 0.2) {
-            insights.push('Koszty inbound shipping są znaczące. Negocjuj lepsze stawki z przewoźnikami.');
-        }
-
-        if (results.fba.profit > results.fbm.profit && results.profitDifference > 500) {
-            insights.push('FBA jest znacznie bardziej opłacalne. Skup się na optymalizacji procesów FBA.');
-        }
-
-        return insights.length > 0 ? insights.join(' ') : null;
-    }
-
-    getFBMStrategyInsights(results) {
-        const insights = [];
-        
-        if (results.fbm.costs.labor > results.fbm.profit * 0.3) {
-            insights.push('Koszty pracy FBM są wysokie. Automatyzuj procesy pakowania.');
-        }
-
-        if (results.fbm.costs.shipping > results.fbm.profit * 0.25) {
-            insights.push('Koszty wysyłki FBM są znaczące. Rozważ negocjacje z przewoźnikami.');
-        }
-
-        if (results.fbm.profit > results.fba.profit && results.profitDifference < -300) {
-            insights.push('FBM jest bardziej opłacalne. Rozważ przejście na FBM dla tego produktu.');
-        }
-
-        return insights.length > 0 ? insights.join(' ') : null;
-    }
-
-    getGeneralInsights(results) {
-        const insights = [];
-        
-        if (results.recommendation === 'FBA') {
-            insights.push('Rekomendacja: FBA - lepsza opłacalność i mniej pracy operacyjnej.');
-        } else if (results.recommendation === 'FBM') {
-            insights.push('Rekomendacja: FBM - wyższy zysk i kontrola nad procesami.');
-        } else {
-            insights.push('Rekomendacja: Mixed - rozważ hybrydowe podejście FBA/FBM.');
-        }
-
-        if (results.fba.roi > 50) {
-            insights.push('ROI FBA jest bardzo dobry (> 50%). Produkt ma duży potencjał.');
-        }
-
-        if (results.fbm.roi > 40) {
-            insights.push('ROI FBM jest dobry (> 40%). Warto rozważyć FBM dla większej kontroli.');
-        }
-
-        return insights.join(' ');
-    }
-
-    addInsightCard(container, title, content, type) {
-        const card = document.createElement('div');
-        card.className = 'insight-card';
-        card.innerHTML = `
-            <h4>${title}</h4>
-            <p>${content}</p>
-        `;
-        container.appendChild(card);
-    }
-
-    loadSavedData() {
-        const savedData = localStorage.getItem('amazonCalculatorData');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            Object.keys(data).forEach(key => {
-                const element = document.getElementById(key);
-                if (element) {
-                    element.value = data[key];
-                }
-            });
-            this.updateStats();
-        }
-    }
-
-    saveData() {
-        const data = this.getFormData();
-        localStorage.setItem('amazonCalculatorData', JSON.stringify(data));
+// QSell Lead Manager - JavaScript
+// System zarządzania leadami z Meta Ads webhook
+
+// Dane logowania (w produkcji powinny być w backend)
+const VALID_CREDENTIALS = {
+    username: 'admin',
+    password: 'admin123'
+};
+
+// Stan aplikacji
+let isLoggedIn = false;
+let currentUser = null;
+let leads = [];
+let quotes = [];
+
+// Inicjalizacja aplikacji
+document.addEventListener('DOMContentLoaded', function() {
+    checkLoginStatus();
+    setupEventListeners();
+});
+
+// Sprawdzanie statusu logowania
+function checkLoginStatus() {
+    const savedUser = localStorage.getItem('qsell_user');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        isLoggedIn = true;
+        showMainApp();
+        loadSampleData();
+    } else {
+        showLoginModal();
     }
 }
 
-// Global functions
-function calculateAll() {
-    calculator.updateStats();
-    calculator.saveData();
+// Pokazywanie głównej aplikacji
+function showMainApp() {
+    document.getElementById('loginModal').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    updateStats();
 }
 
+// Pokazywanie modala logowania
+function showLoginModal() {
+    document.getElementById('loginModal').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+}
+
+// Zamykanie modala logowania
+function closeLoginModal() {
+    // Nie pozwalamy zamknąć modala bez logowania
+    if (!isLoggedIn) {
+        return;
+    }
+}
+
+// Obsługa logowania
+function handleLogin(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorElement = document.getElementById('loginError');
+    
+    // Sprawdzanie danych logowania
+    if (username === VALID_CREDENTIALS.username && password === VALID_CREDENTIALS.password) {
+        // Logowanie udane
+        currentUser = { username, role: 'admin' };
+        isLoggedIn = true;
+        
+        // Zapisanie w localStorage
+        localStorage.setItem('qsell_user', JSON.stringify(currentUser));
+        
+        // Ukrycie błędu
+        errorElement.style.display = 'none';
+        
+        // Pokazanie głównej aplikacji
+        showMainApp();
+        
+        // Wyświetlenie powitania
+        showNotification('Zalogowano pomyślnie!', 'success');
+        
+    } else {
+        // Błąd logowania
+        errorElement.textContent = 'Nieprawidłowa nazwa użytkownika lub hasło';
+        errorElement.style.display = 'block';
+        
+        // Czyszczenie hasła
+        document.getElementById('password').value = '';
+    }
+}
+
+// Wylogowanie
+function logout() {
+    isLoggedIn = false;
+    currentUser = null;
+    localStorage.removeItem('qsell_user');
+    
+    // Czyszczenie danych
+    leads = [];
+    quotes = [];
+    
+    // Pokazanie modala logowania
+    showLoginModal();
+    
+    // Czyszczenie formularza
+    document.getElementById('loginForm').reset();
+    document.getElementById('loginError').style.display = 'none';
+    
+    showNotification('Wylogowano pomyślnie!', 'info');
+}
+
+// Przełączanie zakładek
+function showTab(tabName) {
+    // Ukrycie wszystkich zakładek
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(tab => tab.classList.remove('active'));
+    
+    // Usunięcie aktywnej klasy z wszystkich przycisków
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Pokazanie wybranej zakładki
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    
+    // Aktywacja przycisku
+    event.target.classList.add('active');
+}
+
+// Przełączanie motywu
 function toggleTheme() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('darkMode', isDark);
+    localStorage.setItem('qsell_theme', isDark ? 'dark' : 'light');
     
-    const btn = document.querySelector('.btn-secondary');
+    const icon = event.target.querySelector('i');
     if (isDark) {
-        btn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        icon.className = 'fas fa-sun';
+        event.target.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
     } else {
-        btn.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        icon.className = 'fas fa-moon';
+        event.target.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
     }
 }
 
-function exportResults() {
-    const data = calculator.getFormData();
-    const results = calculator.calculateAll(data);
+// Ładowanie przykładowych danych
+function loadSampleData() {
+    // Przykładowe leady
+    leads = [
+        {
+            id: 1,
+            name: 'Jan Kowalski',
+            email: 'jan.kowalski@example.com',
+            phone: '+48123456789',
+            company: 'TechCorp Sp. z o.o.',
+            source: 'meta_ads',
+            campaign: 'Facebook Lead Ad - Amazon',
+            status: 'new',
+            created_at: '2024-01-15'
+        },
+        {
+            id: 2,
+            name: 'Anna Nowak',
+            email: 'anna.nowak@example.com',
+            phone: '+48987654321',
+            company: 'E-commerce Solutions',
+            source: 'manual',
+            campaign: 'Kontakt telefoniczny',
+            status: 'contacted',
+            created_at: '2024-01-14'
+        },
+        {
+            id: 3,
+            name: 'Piotr Wiśniewski',
+            email: 'piotr.wisniewski@example.com',
+            phone: '+48555123456',
+            company: 'Digital Marketing Pro',
+            source: 'meta_ads',
+            campaign: 'Instagram Lead Ad - eBay',
+            status: 'qualified',
+            created_at: '2024-01-13'
+        }
+    ];
     
-    // Create CSV content
-    const csvContent = [
-        ['Amazon FBA/FBM Calculator Results'],
-        [''],
-        ['Product Information'],
-        ['Product Name', data.productName],
-        ['Category', data.productCategory],
-        ['Selling Price', `${data.sellingPrice} PLN`],
-        ['Product Cost', `${data.productCost} PLN`],
-        ['Monthly Sales', data.monthlySales],
-        [''],
-        ['FBA Results'],
-        ['Monthly Revenue', `${results.monthlyRevenue.toFixed(2)} PLN`],
-        ['FBA Profit', `${results.fba.profit.toFixed(2)} PLN`],
-        ['FBA ROI', `${results.fba.roi.toFixed(1)}%`],
-        ['FBA Margin', `${results.fba.margin.toFixed(1)}%`],
-        [''],
-        ['FBM Results'],
-        ['FBM Profit', `${results.fbm.profit.toFixed(2)} PLN`],
-        ['FBM ROI', `${results.fbm.roi.toFixed(1)}%`],
-        ['FBM Margin', `${results.fbm.margin.toFixed(1)}%`],
-        [''],
-        ['Comparison'],
-        ['Profit Difference (FBA - FBM)', `${results.profitDifference.toFixed(2)} PLN`],
-        ['Recommendation', results.recommendation],
-        [''],
-        ['Generated on', new Date().toLocaleString('pl-PL')]
-    ].map(row => row.join(',')).join('\n');
-
-    // Download CSV file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `amazon-calculator-results-${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Przykładowe wyceny
+    quotes = [
+        {
+            id: 1,
+            lead_id: 1,
+            title: 'Wycena - Amazon + eBay + eMag',
+            total_amount: 12000,
+            discount_percent: 15,
+            final_amount: 10200,
+            status: 'sent',
+            created_at: '2024-01-15'
+        },
+        {
+            id: 2,
+            lead_id: 2,
+            title: 'Wycena - Kaufland + Empik',
+            total_amount: 8000,
+            discount_percent: 10,
+            final_amount: 7200,
+            status: 'draft',
+            created_at: '2024-01-14'
+        }
+    ];
+    
+    updateStats();
+    renderLeads();
+    renderQuotes();
 }
 
-// Initialize calculator when DOM is loaded
-let calculator;
-document.addEventListener('DOMContentLoaded', () => {
-    calculator = new AmazonCalculator();
+// Aktualizacja statystyk
+function updateStats() {
+    const totalLeads = leads.length;
+    const newLeads = leads.filter(lead => lead.status === 'new').length;
+    const totalQuotes = quotes.length;
+    const metaLeads = leads.filter(lead => lead.source === 'meta_ads').length;
     
-    // Load dark mode preference
-    const isDark = localStorage.getItem('darkMode') === 'true';
-    if (isDark) {
+    document.getElementById('totalLeads').textContent = totalLeads;
+    document.getElementById('newLeads').textContent = newLeads;
+    document.getElementById('totalQuotes').textContent = totalQuotes;
+    document.getElementById('metaLeads').textContent = metaLeads;
+}
+
+// Renderowanie leadów
+function renderLeads() {
+    const leadsList = document.getElementById('leadsList');
+    leadsList.innerHTML = '';
+    
+    leads.forEach(lead => {
+        const leadCard = createLeadCard(lead);
+        leadsList.appendChild(leadCard);
+    });
+}
+
+// Tworzenie karty leada
+function createLeadCard(lead) {
+    const card = document.createElement('div');
+    card.className = 'lead-card';
+    card.innerHTML = `
+        <div class="lead-header">
+            <h3>${lead.name}</h3>
+            <span class="status-badge ${lead.status}">${getStatusText(lead.status)}</span>
+        </div>
+        <div class="lead-details">
+            <p><strong>Email:</strong> ${lead.email}</p>
+            <p><strong>Telefon:</strong> ${lead.phone}</p>
+            <p><strong>Firma:</strong> ${lead.company}</p>
+            <p><strong>Źródło:</strong> ${getSourceText(lead.source)}</p>
+            <p><strong>Kampania:</strong> ${lead.campaign}</p>
+            <p><strong>Data:</strong> ${formatDate(lead.created_at)}</p>
+        </div>
+        <div class="lead-actions">
+            <button class="btn btn-primary" onclick="editLead(${lead.id})">
+                <i class="fas fa-edit"></i> Edytuj
+            </button>
+            <button class="btn btn-secondary" onclick="changeLeadStatus(${lead.id})">
+                <i class="fas fa-exchange-alt"></i> Zmień Status
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Renderowanie wycen
+function renderQuotes() {
+    const quotesList = document.getElementById('quotesList');
+    quotesList.innerHTML = '';
+    
+    quotes.forEach(quote => {
+        const quoteCard = createQuoteCard(quote);
+        quotesList.appendChild(quoteCard);
+    });
+}
+
+// Tworzenie karty wyceny
+function createQuoteCard(quote) {
+    const lead = leads.find(l => l.id === quote.lead_id);
+    const card = document.createElement('div');
+    card.className = 'quote-card';
+    card.innerHTML = `
+        <div class="quote-header">
+            <h3>${quote.title}</h3>
+            <span class="status-badge ${quote.status}">${getQuoteStatusText(quote.status)}</span>
+        </div>
+        <div class="quote-details">
+            <p><strong>Klient:</strong> ${lead ? lead.name : 'Nieznany'}</p>
+            <p><strong>Wartość brutto:</strong> ${formatCurrency(quote.total_amount)}</p>
+            <p><strong>Rabat:</strong> ${quote.discount_percent}%</p>
+            <p><strong>Do zapłaty:</strong> ${formatCurrency(quote.final_amount)}</p>
+            <p><strong>Data:</strong> ${formatDate(quote.created_at)}</p>
+        </div>
+        <div class="quote-actions">
+            <button class="btn btn-primary" onclick="editQuote(${quote.id})">
+                <i class="fas fa-edit"></i> Edytuj
+            </button>
+            <button class="btn btn-secondary" onclick="generatePDF(${quote.id})">
+                <i class="fas fa-file-pdf"></i> Generuj PDF
+            </button>
+        </div>
+    `;
+    
+    return card;
+}
+
+// Funkcje pomocnicze
+function getStatusText(status) {
+    const statuses = {
+        'new': 'Nowy',
+        'contacted': 'Skontaktowany',
+        'qualified': 'Kwalifikowany',
+        'proposal': 'Propozycja',
+        'negotiation': 'Negocjacje',
+        'won': 'Wygrany',
+        'lost': 'Przegrany'
+    };
+    return statuses[status] || status;
+}
+
+function getSourceText(source) {
+    const sources = {
+        'meta_ads': 'Meta Ads',
+        'manual': 'Ręczny',
+        'website': 'Strona WWW',
+        'referral': 'Polecenie'
+    };
+    return sources[source] || source;
+}
+
+function getQuoteStatusText(status) {
+    const statuses = {
+        'draft': 'Szkic',
+        'sent': 'Wysłana',
+        'accepted': 'Zaakceptowana',
+        'rejected': 'Odrzucona'
+    };
+    return statuses[status] || status;
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL');
+}
+
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('pl-PL', {
+        style: 'currency',
+        currency: 'PLN'
+    }).format(amount);
+}
+
+// Funkcje akcji (do implementacji)
+function editLead(leadId) {
+    showNotification('Funkcja edycji leada - do implementacji', 'info');
+}
+
+function changeLeadStatus(leadId) {
+    showNotification('Funkcja zmiany statusu - do implementacji', 'info');
+}
+
+function editQuote(quoteId) {
+    showNotification('Funkcja edycji wyceny - do implementacji', 'info');
+}
+
+function generatePDF(quoteId) {
+    showNotification('Generowanie PDF - do implementacji', 'info');
+}
+
+function showAddLeadModal() {
+    showNotification('Funkcja dodawania leada - do implementacji', 'info');
+}
+
+function showAddQuoteModal() {
+    showNotification('Funkcja dodawania wyceny - do implementacji', 'info');
+}
+
+// System powiadomień
+function showNotification(message, type = 'info') {
+    // Tworzenie powiadomienia
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${getNotificationIcon(type)}"></i>
+            <span>${message}</span>
+        </div>
+        <button class="notification-close" onclick="this.parentElement.remove()">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    // Dodanie stylów
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${getNotificationColor(type)};
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 300px;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    // Dodanie do body
+    document.body.appendChild(notification);
+    
+    // Automatyczne usunięcie po 5 sekundach
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function getNotificationIcon(type) {
+    const icons = {
+        'success': 'check-circle',
+        'error': 'exclamation-circle',
+        'warning': 'exclamation-triangle',
+        'info': 'info-circle'
+    };
+    return icons[type] || 'info-circle';
+}
+
+function getNotificationColor(type) {
+    const colors = {
+        'success': '#4caf50',
+        'error': '#f44336',
+        'warning': '#ff9800',
+        'info': '#2196f3'
+    };
+    return colors[type] || '#2196f3';
+}
+
+// Animacje CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .lead-card, .quote-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary-green);
+    }
+    
+    .lead-header, .quote-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+    
+    .lead-header h3, .quote-header h3 {
+        color: var(--dark-gray);
+        font-size: 1.2rem;
+    }
+    
+    .lead-details, .quote-details {
+        margin-bottom: 16px;
+    }
+    
+    .lead-details p, .quote-details p {
+        margin-bottom: 8px;
+        color: var(--gray);
+    }
+    
+    .lead-actions, .quote-actions {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+    
+    .status-badge.new {
+        background: var(--primary-orange);
+        color: white;
+    }
+    
+    .status-badge.contacted {
+        background: #2196f3;
+        color: white;
+    }
+    
+    .status-badge.qualified {
+        background: var(--primary-green);
+        color: white;
+    }
+    
+    .status-badge.proposal {
+        background: #9c27b0;
+        color: white;
+    }
+    
+    .status-badge.negotiation {
+        background: #ff9800;
+        color: white;
+    }
+    
+    .status-badge.won {
+        background: var(--primary-green);
+        color: white;
+    }
+    
+    .status-badge.lost {
+        background: var(--accent-red);
+        color: white;
+    }
+    
+    .status-badge.draft {
+        background: var(--gray);
+        color: white;
+    }
+    
+    .status-badge.sent {
+        background: #2196f3;
+        color: white;
+    }
+    
+    .status-badge.accepted {
+        background: var(--primary-green);
+        color: white;
+    }
+    
+    .status-badge.rejected {
+        background: var(--accent-red);
+        color: white;
+    }
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background 0.3s ease;
+    }
+    
+    .notification-close:hover {
+        background: rgba(255,255,255,0.2);
+    }
+`;
+document.head.appendChild(style);
+
+// Ustawienie event listenerów
+function setupEventListeners() {
+    // Sprawdzenie zapisanego motywu
+    const savedTheme = localStorage.getItem('qsell_theme');
+    if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
-        const btn = document.querySelector('.btn-secondary');
-        btn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        const themeBtn = document.querySelector('.btn-secondary');
+        if (themeBtn) {
+            themeBtn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        }
     }
-}); 
+    
+    // Obsługa klawisza Escape w modalu logowania
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && !isLoggedIn) {
+            // Nie pozwalamy zamknąć modala bez logowania
+            event.preventDefault();
+        }
+    });
+} 

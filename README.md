@@ -1,215 +1,230 @@
-# 🚀 Amazon FBA/FBM Calculator Pro
+# QSell Lead Manager
 
-**Zaawansowany kalkulator opłacalności Amazon FBA/FBM** - profesjonalne narzędzie do analizy rentowności sprzedaży na Amazon z porównaniem FBA vs FBM.
+## 🚀 **Zaawansowany System Zarządzania Leadami z Meta Ads Webhook**
 
-## ✨ Funkcje
+**QSell Lead Manager** to potężne narzędzie firmowe do zarządzania leadami, systemu wycen i integracji z Meta Ads. Aplikacja automatycznie pobiera leady z Facebooka i umożliwia kompleksowe zarządzanie procesem sprzedaży.
 
-### 📊 Kompleksowe Kalkulacje
-- **FBA vs FBM** - szczegółowe porównanie opłacalności
-- **Wszystkie opłaty Amazon** - fulfillment, storage, referral fees
-- **Koszty FBM** - shipping, packaging, labor, overhead
-- **ROI i marże** - automatyczne obliczenia
-- **Rekomendacje** - inteligentne sugestie
+## ✨ **Główne Funkcje**
 
-### 🎯 Zaawansowane Funkcje
-- **Real-time kalkulacje** - wyniki na żywo
-- **Dark/Light mode** - przełączanie motywów
-- **Eksport CSV** - wyniki do pliku
-- **Zapisywanie danych** - lokalne przechowywanie
-- **Responsywny design** - działa na wszystkich urządzeniach
+### 🔐 **System Bezpieczeństwa**
+- **Logowanie z hasłem** - ochrona dostępu do aplikacji
+- **Sesje użytkownika** - bezpieczne zarządzanie dostępem
+- **Role użytkowników** - admin i user
 
-### 📈 Szczegółowa Analiza
-- **Opłaty Fulfillment** - według rozmiaru i wagi
-- **Opłaty Magazynowe** - miesięczne i długoterminowe
-- **Koszty Wysyłki** - InPost, Poczta Polska, DPD
-- **Koszty Pracy** - stawki godzinowe i czas pakowania
-- **Koszty Reklamy** - CPC i conversion rate
-- **Zwroty** - return rate i koszty zwrotów
+### 📱 **Meta Ads Integration**
+- **Automatyczne webhook** - leady z Facebooka trafiają automatycznie
+- **Mapowanie pól** - inteligentne dopasowanie danych Meta do Lead Manager
+- **Logowanie webhook** - pełna historia integracji
+- **Weryfikacja Meta** - bezpieczne połączenie z Facebookiem
 
-## 🚀 Szybki Start
+### 💰 **System Wycen**
+- **Automatyczne obliczanie** cen za pakiety usług
+- **Rabaty procentowe** - ręczne ustawianie rabatów w %
+- **Rabaty za pakiety** - automatyczne 500 PLN za minimum 2 usługi
+- **Generowanie PDF** - profesjonalne wyceny z logo QSell
 
-1. **Otwórz** `index.html` w przeglądarce
-2. **Wypełnij** podstawowe informacje o produkcie
-3. **Dostosuj** koszty FBA i FBM
-4. **Kliknij** "Oblicz Wszystko"
-5. **Analizuj** wyniki i rekomendacje
+### 📊 **Zarządzanie Leadami**
+- **Statusy leadów** - nowy, skontaktowany, kwalifikowany, propozycja, negocjacje, wygrany, przegrany
+- **Źródła leadów** - Meta Ads, ręczny, strona WWW, polecenie
+- **Historia kontaktów** - pełne śledzenie procesu sprzedaży
+- **Przypisanie użytkowników** - delegowanie leadów do zespołu
 
-## 📋 Wymagane Dane Wejściowe
+### 🎯 **Cenniki Usług QSell**
+- **Amazon** - wdrożenie 4000-5000 PLN, obsługa ADS 1890 PLN/mies.
+- **eBay** - wdrożenie 2500-3500 PLN, obsługa ADS 1390 PLN/mies.
+- **eMag** - wdrożenie 3000-10000 PLN, obsługa ADS 790 PLN/mies., kompleks 1500 PLN/mies.
+- **Kaufland** - wdrożenie 2500-4500 PLN, obsługa ADS 1390 PLN/mies.
+- **Empik** - wdrożenie 3000-10000 PLN, obsługa ADS 790 PLN/mies., kompleks 1190 PLN/mies.
+- **ERLI** - wdrożenie 3000-10000 PLN, standard 790 PLN/mies., kompleks 1190 PLN/mies.
+- **Allegro CZ/SK/HU** - 300 PLN/mies./rynek
+- **Base.com** - wdrożenie 3000-10000 PLN
 
-### Podstawowe Informacje
-- ✅ Nazwa produktu
-- ✅ Kategoria (automatyczne prowizje)
-- ✅ Cena sprzedaży
-- ✅ Koszt produktu
-- ✅ Wymiary i waga
-- ✅ Plan sprzedaży miesięcznej
+## 🛠️ **Technologie**
 
-### Koszty FBA
-- ✅ Rozmiar tier (Small/Large/Oversize)
-- ✅ Opłaty fulfillment (automatyczne)
-- ✅ Opłaty magazynowe
-- ✅ Koszty inbound shipping
-- ✅ Opłaty prep
-
-### Koszty FBM
-- ✅ Metoda wysyłki
-- ✅ Koszty opakowania
-- ✅ Stawka godzinowa
-- ✅ Koszty ogólne
-
-### Zaawansowane
-- ✅ Prowizja referral (automatyczna)
-- ✅ Koszty reklamy (CPC)
-- ✅ Conversion rate
-- ✅ Return rate
-
-## 💡 Przykład Kalkulacji
-
-### Produkt: Smartphone Case
-- **Cena sprzedaży:** 50 PLN
-- **Koszt produktu:** 15 PLN
-- **Waga:** 0.2 kg
-- **Sprzedaż miesięczna:** 100 szt.
-
-### Wyniki FBA:
-- **Zysk miesięczny:** 2,450 PLN
-- **ROI:** 163%
-- **Marża:** 49%
-
-### Wyniki FBM:
-- **Zysk miesięczny:** 2,800 PLN
-- **ROI:** 187%
-- **Marża:** 56%
-
-### Rekomendacja: FBM (wyższy zysk)
-
-## 🎨 Design
-
-- **Amazon Branding** - pomarańczowy/niebieski motyw
-- **Glassmorphism** - nowoczesne efekty
-- **Responsywny** - mobile-first design
-- **Dark Mode** - przyjazny dla oczu
-- **Smooth Animations** - płynne przejścia
-
-## 🛠️ Technologie
-
+### **Frontend**
 - **HTML5** - semantyczna struktura
-- **CSS3** - nowoczesne style i animacje
-- **JavaScript ES6+** - zaawansowana logika
-- **LocalStorage** - zapisywanie danych
+- **CSS3** - nowoczesny design z zieleniami, beżami i pomarańczami
+- **JavaScript (ES6+)** - interaktywna logika aplikacji
 - **Font Awesome** - ikony
-- **Google Fonts** - typografia
+- **Inter Font** - nowoczesna typografia
 
-## 📱 Responsywność
+### **Backend**
+- **PHP 8.3** - najnowsza wersja PHP
+- **MySQL 8.0** - baza danych
+- **PDO** - bezpieczne połączenia z bazą
+- **Sesje PHP** - zarządzanie użytkownikami
 
-- ✅ **Desktop** - pełna funkcjonalność
-- ✅ **Tablet** - zoptymalizowany layout
-- ✅ **Mobile** - touch-friendly interface
-- ✅ **Wszystkie przeglądarki** - cross-browser compatibility
+### **Integracje**
+- **Meta Ads Webhook** - automatyczne leady z Facebooka
+- **wkhtmltopdf** - generowanie PDF wycen
+- **REST API** - endpointy dla integracji
 
-## 🌙 Dark Mode
+## 📁 **Struktura Projektu**
 
-- **Automatyczne zapisywanie** preferencji
-- **Smooth transitions** między motywami
-- **Zoptymalizowane kolory** dla każdego motywu
-- **Przyjazny dla oczu** w ciemnych pomieszczeniach
+```
+qsell-lead-manager/
+├── index.html              # Główna aplikacja
+├── styles.css              # Style CSS
+├── script.js               # Logika JavaScript
+├── backend/                # Backend PHP
+│   ├── config.php          # Konfiguracja
+│   ├── database.php        # Baza danych
+│   └── quotes.php          # System wycen
+├── api/                    # API endpoints
+│   └── meta-webhook.php    # Meta Ads webhook
+├── auth/                   # System logowania
+│   └── login.php           # Logowanie
+├── docs/                   # Dokumentacja
+│   └── DEPLOYMENT.md       # Instrukcje deployment
+├── .htaccess               # Konfiguracja Apache
+├── composer.json           # Zależności PHP
+└── README.md               # Ten plik
+```
 
-## 📤 Eksport Danych
+## 🚀 **Szybki Start**
 
-- **Format CSV** - kompatybilny z Excel
-- **Wszystkie wyniki** - kompletne dane
-- **Timestamp** - data i czas generowania
-- **Automatyczne pobieranie** - jeden klik
-
-## 🔧 Instalacja
-
-1. **Sklonuj repozytorium:**
+### **1. Pobranie Projektu**
 ```bash
-git clone https://github.com/grudvv/amazon-fba-calculator.git
-cd amazon-fba-calculator
+git clone https://github.com/grudvv/qsell-lead-manager.git
+cd qsell-lead-manager
 ```
 
-2. **Otwórz w przeglądarce:**
+### **2. Konfiguracja Backend (PHP 8.3)**
 ```bash
-open index.html
+# Edycja konfiguracji
+nano backend/config.php
+
+# Uruchomienie bazy danych
+php -f backend/database.php
 ```
 
-3. **Lub uruchom lokalny serwer:**
+### **3. Konfiguracja Meta Ads**
+- **Facebook Developer** → Create App → Business → Lead Ads
+- **Meta Ads Manager** → Lead Ad → Webhook URL
+- **Token weryfikacji**: `qsell_webhook_2024`
+
+### **4. Uruchomienie**
 ```bash
-python -m http.server 8000
-# Otwórz http://localhost:8000
+# Serwer lokalny
+php -S localhost:8000
+
+# Lub przez hosting (OVH, Hostinger, etc.)
 ```
 
-## 📊 Struktura Plików
+## 🔑 **Domyślne Dane Logowania**
 
+- **URL**: `/auth/login.php`
+- **Login**: `admin`
+- **Hasło**: `admin123`
+
+**⚠️ ZMIEŃ HASŁO NA PRODUKCJI!**
+
+## 📱 **Meta Ads Webhook**
+
+### **URL Webhook**
 ```
-amazon-fba-calculator/
-├── index.html          # Główny plik HTML
-├── styles.css          # Style CSS
-├── script.js           # Logika JavaScript
-├── README.md           # Dokumentacja
-└── .gitignore          # Git ignore
+https://twoja-domena.pl/api/meta-webhook.php
 ```
 
-## 🚀 Deployment
+### **Token Weryfikacji**
+```
+qsell_webhook_2024
+```
 
-### GitHub Pages
-1. Przejdź do Settings > Pages
-2. Wybierz Source: Deploy from a branch
-3. Wybierz branch: main
-4. Kliknij Save
+### **Pola Meta → Lead Manager**
+- `full_name` → `name`
+- `email` → `email`
+- `phone_number` → `phone`
+- `company_name` → `company`
+- `ad_name` → `campaign`
 
-### Netlify
-1. Połącz z repozytorium GitHub
-2. Wybierz branch: main
-3. Build command: (puste)
-4. Publish directory: (puste)
+## 💰 **System Wycen**
 
-### Vercel
-1. Importuj z GitHub
-2. Wybierz framework: Other
-3. Deploy
+### **Automatyczne Rabaty**
+- **500 PLN** za pakiet z minimum 2 usługami
+- **Rabat procentowy** - ustawiany ręcznie przez admina
+- **Kalkulacja końcowa** - automatyczne przeliczanie
 
-## 🔮 Przyszłe Funkcje
+### **Przykład Wyceny**
+```
+Amazon + eBay + eMag:
+- Wdrożenie: 4000 + 2500 + 3000 = 9500 PLN
+- Rabat pakietowy: -500 PLN
+- Rabat 15%: -1350 PLN
+- Do zapłaty: 7650 PLN
+```
 
-- [ ] **Wielojęzyczność** - EN, DE, FR
-- [ ] **Historia kalkulacji** - zapisywanie wyników
-- [ ] **Wykresy** - wizualizacja danych
-- [ ] **API Integration** - rzeczywiste dane Amazon
-- [ ] **Bulk Import** - import z CSV/Excel
-- [ ] **Team Collaboration** - współdzielenie wyników
-- [ ] **Advanced Analytics** - trend analysis
-- [ ] **Mobile App** - React Native
+## 🎨 **Design System**
 
-## 🤝 Contributing
+### **Kolory QSell**
+- **Zielenie**: #2e7d32, #4caf50, #81c784
+- **Beże**: #f5f5dc, #e8e8d0
+- **Pomarańcze**: #ff9800, #ffb74d
+- **Akcenty**: #f44336 (czerwony tylko dla odrzuconych)
 
-1. **Fork** repozytorium
-2. **Utwórz** feature branch (`git checkout -b feature/AmazingFeature`)
-3. **Commit** zmiany (`git commit -m 'Add some AmazingFeature'`)
-4. **Push** do branch (`git push origin feature/AmazingFeature`)
-5. **Otwórz** Pull Request
+### **Motyw**
+- **Light Mode** - domyślny
+- **Dark Mode** - przełączany
+- **Responsywny** - mobile-first design
 
-## 📄 Licencja
+## 📊 **Baza Danych**
 
-Ten projekt jest dostępny na licencji MIT. Zobacz plik `LICENSE` dla szczegółów.
+### **Tabele**
+- **users** - użytkownicy systemu
+- **leads** - leady i kontakty
+- **quotes** - wyceny
+- **quote_items** - pozycje wycen
+- **email_templates** - szablony maili
+- **sent_emails** - wysłane maile
+- **meta_webhook_logs** - logi Meta Ads
 
-## 👨‍💻 Autor
+## 🔧 **Konfiguracja**
 
-**grudvv** - [GitHub](https://github.com/grudvv)
+### **Wymagania Serwera**
+- **PHP 8.3+** (wymagane!)
+- **MySQL 8.0+** lub PostgreSQL 13+
+- **Nginx** lub Apache
+- **wkhtmltopdf** (dla generowania PDF)
 
-## 🙏 Podziękowania
+### **Rozszerzenia PHP**
+- PDO MySQL
+- JSON
+- cURL
+- mbstring
+- XML
+- ZIP
+- GD
+- bcmath
 
-- **Amazon** - za inspirację i dane
-- **Font Awesome** - za ikony
-- **Google Fonts** - za typografię
-- **Społeczność** - za feedback i sugestie
+## 📚 **Dokumentacja**
 
-## 📞 Support
+- **[DEPLOYMENT.md](docs/DEPLOYMENT.md)** - szczegółowe instrukcje deployment
+- **Konfiguracja Meta Ads** - krok po kroku
+- **System wycen** - przykłady i kalkulacje
+- **API Reference** - endpointy i parametry
 
-- **Issues:** [GitHub Issues](https://github.com/grudvv/amazon-fba-calculator/issues)
-- **Email:** grudvv@github.com
-- **Discord:** grudvv#1234
+## 🤝 **Wsparcie**
+
+### **Kontakt**
+- **Email**: info@qsell.pl
+- **Telefon**: +48 795 805 500
+- **Strona**: https://qsell.pl
+
+### **Wsparcie Techniczne**
+- **GitHub Issues** - zgłaszanie błędów
+- **Dokumentacja** - szczegółowe instrukcje
+- **Przykłady** - gotowe implementacje
+
+## 📄 **Licencja**
+
+**MIT License** - darmowe użytkowanie komercyjne i niekomercyjne.
+
+## 🙏 **Podziękowania**
+
+- **QSell Team** - za pomysły i wymagania
+- **Meta/Facebook** - za API Lead Ads
+- **Społeczność PHP** - za biblioteki i narzędzia
 
 ---
 
-⭐ **Jeśli projekt Ci się podoba, daj gwiazdkę na GitHub!** ⭐ 
+**🎯 QSell Lead Manager - Profesjonalne zarządzanie leadami dla Twojej firmy!**
